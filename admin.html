@@ -132,7 +132,6 @@
 <body>
 
   <script>
-    // Zabezpieczenie przed bezpośrednim wejściem bez podania hasła
     if (sessionStorage.getItem("quizAdminAuth") !== "true") {
       window.location.href = "index.html";
     }
@@ -266,9 +265,16 @@
       ]
     };
 
-    let currentLang = localStorage.getItem("quizLang") || "pl";
+    function detectBrowserLanguage() {
+      const userLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
+      if (userLang.startsWith("ja")) return "ja";
+      if (userLang.startsWith("en")) return "en";
+      return "pl";
+    }
+
+    let currentLang = localStorage.getItem("quizLang") || detectBrowserLanguage();
     let questions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
-    let editingIndex = null; // null = dodawanie, liczba = indeks edytowanego pytania
+    let editingIndex = null;
 
     const langSelect = document.getElementById("lang-select");
     const backLink = document.getElementById("back-link");
@@ -377,10 +383,8 @@
       }
 
       if (editingIndex === null) {
-        // Dodawanie nowego pytania
         questions.push({ label, text, answer, color });
       } else {
-        // Zapisywanie edytowanego pytania
         questions[editingIndex] = { label, text, answer, color };
       }
 
