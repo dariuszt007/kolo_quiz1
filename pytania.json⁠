@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "question": "Ile wynosi 7 × 8?",
+    "answer": "56"
+  },
+  {
+    "id": 2,
+    "question": "Jaka jest stolica Japonii?",
+    "answer": "Tokio"
+  },
+  {
+    "id": 3,
+    "question": "Który pierwiastek ma symbol 'O'?",
+    "answer": "Tlen"
+  },
+  {
+    "id": 4,
+    "question": "Ile sekund ma godzina?",
+    "answer": "3600 sekund"
+  },
+  {
+    "id": 5,
+    "question": "W którym roku wybuchła II wojna światowa?",
+    "answer": "1939"
+  },
+  {
+    "id": 6,
+    "question": "Jak nazywa się najdłuższa rzeka w Polsce?",
+    "answer": "Wisła"
+  }
+]
