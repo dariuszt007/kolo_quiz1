@@ -1,447 +1,202 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz Ruletka / Quiz Wheel</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      background-color: #f4f4f9;
-      color: #333;
-    }
-
-    .top-bar {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .lang-select {
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      background: #fff;
-      cursor: pointer;
-    }
-
-    .nav-link {
-      padding: 8px 16px;
-      background-color: #34495e;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .controls-bar {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-      align-items: center;
-    }
-
-    .reset-btn {
-      padding: 12px 20px;
-      font-size: 14px;
-      font-weight: bold;
-      color: #fff;
-      background-color: #e67e22;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .reset-btn:hover { background-color: #d35400; }
-
-    .wheel-container {
-      position: relative;
-      width: 320px;
-      height: 320px;
-      margin-top: 15px;
-    }
-
-    .pointer {
-      position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-top: 25px solid #e74c3c;
-      z-index: 10;
-    }
-
-    #canvas {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-
-    button.spin-btn {
-      padding: 12px 24px;
-      font-size: 18px;
-      font-weight: bold;
-      color: #fff;
-      background-color: #2ecc71;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    button.spin-btn:hover { background-color: #27ae60; }
-    button.spin-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-
-    .quiz-box {
-      margin-top: 20px;
-      padding: 20px;
-      max-width: 400px;
-      width: 90%;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      text-align: center;
-      display: none;
-    }
-
-    .question-content {
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .hint {
-      font-size: 12px;
-      color: #7f8c8d;
-      margin-top: 5px;
-      margin-bottom: 10px;
-    }
-
-    .answer-box {
-      margin-top: 15px;
-      padding: 10px;
-      background-color: #e8f8f5;
-      border: 1px solid #2ecc71;
-      border-radius: 6px;
-      color: #27ae60;
-      font-weight: bold;
-      display: none;
-    }
-
-    .remove-option {
-      margin-top: 15px;
-      padding-top: 10px;
-      border-top: 1px dashed #ddd;
-      font-size: 13px;
-      color: #555;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .empty-message {
-      margin-top: 15px;
-      color: #e74c3c;
-      font-weight: bold;
-      display: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktywna Ruletka - Quiz</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        header { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .btn { background-color: #ff9800; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: transform 0.2s, background-color 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2); text-decoration: none; display: inline-block; }
+        .btn:hover { background-color: #e68a00; transform: translateY(-2px); }
+        .btn-secondary { background-color: #4caf50; }
+        .btn-secondary:hover { background-color: #45a049; }
+        .btn-danger { background-color: #f44336; }
+        .btn-danger:hover { background-color: #da190b; }
+        .main-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; gap: 20px; }
+        .wheel-container { position: relative; width: 320px; height: 320px; margin: 20px 0; }
+        @media (min-width: 600px) { .wheel-container { width: 450px; height: 450px; } }
+        #wheel { width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
+        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff1744; z-index: 10; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5)); }
+        .controls { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+        .question-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 20px; width: 100%; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: none; }
+        .question-card.active { display: block; }
+        .question-title { font-size: 1.4rem; margin-bottom: 15px; }
+        .timer-display { font-size: 2rem; font-weight: bold; color: #ffeb3b; margin: 10px 0; }
+        .answer-box { background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; display: none; font-size: 1.1rem; }
+    </style>
 </head>
 <body>
 
-  <div class="top-bar">
-    <select id="lang-select" class="lang-select">
-      <option value="pl">🇵🇱 Polski</option>
-      <option value="en">🇬🇧 English</option>
-      <option value="ja">🇯🇵 日本語</option>
-    </select>
-    <a id="admin-link" class="nav-link">⚙️ Panel edycji</a>
-  </div>
+    <header>
+        <h1>🎯 Interaktywna Ruletka</h1>
+        <a href="admin.html" class="btn">⚙️ Panel Admina</a>
+    </header>
 
-  <h1 id="main-title">Quiz - Zakręć Kołem!</h1>
+    <div class="main-container">
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="450" height="450"></canvas>
+        </div>
 
-  <div class="wheel-container">
-    <div class="pointer"></div>
-    <canvas id="canvas" width="400" height="400"></canvas>
-  </div>
+        <div class="controls">
+            <button class="btn btn-secondary" id="spinBtn" onclick="spinWheel()">Zakręć Kołem!</button>
+            <button class="btn btn-danger" onclick="resetQuestions()">Resetuj pytania</button>
+        </div>
 
-  <div class="controls-bar">
-    <button id="spin-btn" class="spin-btn">Zakręć kołem!</button>
-    <button id="reset-btn" class="reset-btn">🔄 Zacznij od nowa</button>
-  </div>
-
-  <div id="empty-msg" class="empty-message">Wszystkie pytania zostały wylosowane! Kliknij "Zacznij od nowa".</div>
-
-  <div id="quiz-box" class="quiz-box">
-    <div id="question-clickable" class="question-content">
-      <h3 id="question-title">Pytanie</h3>
-      <p id="question-text"></p>
-      <div id="hint-text" class="hint">👇 Kliknij tutaj, aby zobaczyć odpowiedź</div>
-      <div id="answer-box" class="answer-box"></div>
+        <div class="question-card" id="questionCard">
+            <div class="question-title" id="questionText">Pytanie pojawi się tutaj...</div>
+            <div class="timer-display" id="timerDisplay">--</div>
+            <button class="btn" id="showAnswerBtn" onclick="toggleAnswer()">Pokaż odpowiedź</button>
+            <div class="answer-box" id="answerText"></div>
+        </div>
     </div>
 
-    <div class="remove-option">
-      <input type="checkbox" id="remove-check">
-      <label for="remove-check" id="remove-label">Usuń to pytanie z koła po wylosowaniu</label>
-    </div>
-  </div>
+    <script>
+        let questions = [];
+        let activeQuestions = [];
+        let removeOnSpin = JSON.parse(localStorage.getItem('roulette_remove_on_spin')) || false;
+        let timerSeconds = parseInt(localStorage.getItem('roulette_timer')) || 30;
 
-  <script>
-    const ADMIN_PASSWORD = "1111";
+        let isSpinning = false;
+        let currentRotation = 0;
+        let selectedQuestion = null;
+        let timerInterval = null;
 
-    const translations = {
-      pl: {
-        title: "Quiz - Zakręć Kołem!",
-        adminLink: "⚙️ Panel edycji",
-        spinBtn: "Zakręć kołem!",
-        resetBtn: "🔄 Zacznij od nowa",
-        hint: "👇 Kliknij tutaj, aby zobaczyć odpowiedź",
-        answerPrefix: "Odpowiedź: ",
-        noAnswer: "Brak zdefiniowanej odpowiedzi.",
-        removeLabel: "Usuń to pytanie z koła po wylosowaniu",
-        emptyMsg: "Wszystkie pytania zostały wylosowane! Kliknij \"Zacznij od nowa\".",
-        passPrompt: "Podaj hasło do panelu edycji:",
-        passError: "Niepoprawne hasło!"
-      },
-      en: {
-        title: "Quiz - Spin the Wheel!",
-        adminLink: "⚙️ Edit Panel",
-        spinBtn: "Spin the wheel!",
-        resetBtn: "🔄 Start over",
-        hint: "👇 Click here to see the answer",
-        answerPrefix: "Answer: ",
-        noAnswer: "No answer defined.",
-        removeLabel: "Remove this question from wheel",
-        emptyMsg: "All questions have been drawn! Click \"Start over\".",
-        passPrompt: "Enter password for admin panel:",
-        passError: "Incorrect password!"
-      },
-      ja: {
-        title: "クイズ - ルーレットを回そう！",
-        adminLink: "⚙️ 編集パネル",
-        spinBtn: "ルーレットを回す！",
-        resetBtn: "🔄 最初からやり直す",
-        hint: "👇 クリックして回答を表示",
-        answerPrefix: "答え: ",
-        noAnswer: "回答が設定されていません。",
-        removeLabel: "この質問をルーレットから除外する",
-        emptyMsg: "すべての質問が終了しました！「最初からやり直す」をクリックしてください。",
-        passPrompt: "編集パネルのパスワードを入力してください:",
-        passError: "パスワードが正しくありません！"
-      }
-    };
+        const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#ff9800', '#ff5722'];
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
 
-    const defaultQuestions = {
-      pl: [
-        { label: "Pytanie 1", color: "#3498db", text: "Jaka jest stolica Japonii?", answer: "Tokio" },
-        { label: "Pytanie 2", color: "#e67e22", text: "Ile dni ma rok przestępny?", answer: "366 dni" },
-        { label: "Pytanie 3", color: "#9b59b6", text: "Jaki jest największy ocean na Ziemi?", answer: "Ocean Spokojny (Pacyfik)" },
-        { label: "Pytanie 4", color: "#f1c40f", text: "Kto napisał 'Pana Tadeusza'?", answer: "Adam Mickiewicz" }
-      ],
-      en: [
-        { label: "Question 1", color: "#3498db", text: "What is the capital of Japan?", answer: "Tokyo" },
-        { label: "Question 2", color: "#e67e22", text: "How many days are in a leap year?", answer: "366 days" },
-        { label: "Question 3", color: "#9b59b6", text: "What is the largest ocean on Earth?", answer: "Pacific Ocean" },
-        { label: "Question 4", color: "#f1c40f", text: "Who painted the Mona Lisa?", answer: "Leonardo da Vinci" }
-      ],
-      ja: [
-        { label: "質問 1", color: "#3498db", text: "日本の首都はどこですか？", answer: "東京" },
-        { label: "質問 2", color: "#e67e22", text: "うるう年は一年で何日ありますか？", answer: "366日" },
-        { label: "質問 3", color: "#9b59b6", text: "地球上で最も広い大洋は何ですか？", answer: "太平洋" },
-        { label: "質問 4", color: "#f1c40f", text: "モナ・リザを描いたのは誰ですか？", answer: "レオナルド・ダ・ヴィンチ" }
-      ]
-    };
-
-    function detectBrowserLanguage() {
-      const userLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
-      if (userLang.startsWith("ja")) return "ja";
-      if (userLang.startsWith("en")) return "en";
-      return "pl";
-    }
-
-    let currentLang = localStorage.getItem("quizLang") || detectBrowserLanguage();
-    let allQuestions = [];
-    let activeQuestions = [];
-    let currentSelectedIndex = null;
-
-    const langSelect = document.getElementById("lang-select");
-    const mainTitle = document.getElementById("main-title");
-    const adminLink = document.getElementById("admin-link");
-    const spinBtn = document.getElementById("spin-btn");
-    const resetBtn = document.getElementById("reset-btn");
-    const hintText = document.getElementById("hint-text");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const quizBox = document.getElementById("quiz-box");
-    const questionClickable = document.getElementById("question-clickable");
-    const questionTitle = document.getElementById("question-title");
-    const questionText = document.getElementById("question-text");
-    const answerBox = document.getElementById("answer-box");
-    const removeCheck = document.getElementById("remove-check");
-    const removeLabel = document.getElementById("remove-label");
-    const emptyMsg = document.getElementById("empty-msg");
-
-    let currentAngle = 0;
-    let isSpinning = false;
-
-    function applyLanguage(lang) {
-      currentLang = lang;
-      localStorage.setItem("quizLang", lang);
-      langSelect.value = lang;
-
-      const t = translations[lang];
-      mainTitle.innerText = t.title;
-      adminLink.innerText = t.adminLink;
-      spinBtn.innerText = t.spinBtn;
-      resetBtn.innerText = t.resetBtn;
-      hintText.innerText = t.hint;
-      removeLabel.innerText = t.removeLabel;
-      emptyMsg.innerText = t.emptyMsg;
-
-      resetWheel();
-    }
-
-    function resetWheel() {
-      allQuestions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
-      activeQuestions = [...allQuestions];
-      quizBox.style.display = "none";
-      answerBox.style.display = "none";
-      emptyMsg.style.display = "none";
-      spinBtn.disabled = false;
-      drawWheel();
-    }
-
-    function drawWheel() {
-      const numSegments = activeQuestions.length;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (numSegments === 0) {
-        spinBtn.disabled = true;
-        emptyMsg.style.display = "block";
-        return;
-      }
-
-      emptyMsg.style.display = "none";
-      spinBtn.disabled = false;
-
-      const arcSize = (2 * Math.PI) / numSegments;
-      const radius = canvas.width / 2;
-
-      for (let i = 0; i < numSegments; i++) {
-        const angle = currentAngle + i * arcSize;
-        ctx.beginPath();
-        ctx.fillStyle = activeQuestions[i].color;
-        ctx.moveTo(radius, radius);
-        ctx.arc(radius, radius, radius, angle, angle + arcSize);
-        ctx.lineTo(radius, radius);
-        ctx.fill();
-
-        ctx.save();
-        ctx.translate(radius, radius);
-        ctx.rotate(angle + arcSize / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 16px Arial";
-        ctx.fillText(activeQuestions[i].label, radius - 20, 6);
-        ctx.restore();
-      }
-    }
-
-    function spin() {
-      if (isSpinning || activeQuestions.length === 0) return;
-
-      // Jeśli wybrano usunięcie poprzedniego pytania, usuwamy je przed nowym losem
-      if (currentSelectedIndex !== null && removeCheck.checked) {
-        activeQuestions.splice(currentSelectedIndex, 1);
-        currentSelectedIndex = null;
-        if (activeQuestions.length === 0) {
-          quizBox.style.display = "none";
-          drawWheel();
-          return;
+        async function init() {
+            const localData = localStorage.getItem('roulette_questions');
+            if (localData) {
+                questions = JSON.parse(localData);
+            } else {
+                try {
+                    const res = await fetch('pytania.json');
+                    questions = await res.json();
+                    localStorage.setItem('roulette_questions', JSON.stringify(questions));
+                } catch (e) {
+                    console.error("Błąd podczas ładowania pliku pytania.json:", e);
+                }
+            }
+            activeQuestions = [...questions];
+            drawWheel();
         }
-      }
 
-      removeCheck.checked = false;
-      isSpinning = true;
-      spinBtn.disabled = true;
-      quizBox.style.display = "none";
-      answerBox.style.display = "none";
+        function drawWheel() {
+            const numOptions = activeQuestions.length;
+            if (numOptions === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = '20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText("Brak pytań! Zresetuj listę.", canvas.width / 2, canvas.height / 2);
+                return;
+            }
 
-      const spinAngle = Math.random() * 2000 + 3000;
-      const spinTime = 4000;
-      let start = null;
+            const arcSize = (2 * Math.PI) / numOptions;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      function animate(timestamp) {
-        if (!start) start = timestamp;
-        const progress = timestamp - start;
-        const easeOut = 1 - Math.pow(1 - Math.min(progress / spinTime, 1), 3);
+            for (let i = 0; i < numOptions; i++) {
+                const angle = i * arcSize;
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);
+                ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 10, angle, angle + arcSize);
+                ctx.lineTo(canvas.width / 2, canvas.height / 2);
+                ctx.fill();
+                ctx.stroke();
 
-        currentAngle = (spinAngle * (Math.PI / 180) * easeOut) % (2 * Math.PI);
-        drawWheel();
-
-        if (progress < spinTime) {
-          requestAnimationFrame(animate);
-        } else {
-          isSpinning = false;
-          spinBtn.disabled = false;
-          showResult();
+                ctx.save();
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(angle + arcSize / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#fff";
+                ctx.font = "bold 16px sans-serif";
+                
+                let text = activeQuestions[i].question;
+                if (text.length > 18) text = text.substring(0, 15) + '...';
+                
+                ctx.fillText(text, canvas.width / 2 - 30, 5);
+                ctx.restore();
+            }
         }
-      }
 
-      requestAnimationFrame(animate);
-    }
+        function spinWheel() {
+            if (isSpinning || activeQuestions.length === 0) return;
 
-    function showResult() {
-      const numSegments = activeQuestions.length;
-      const degrees = (currentAngle * 180 / Math.PI) % 360;
-      const pointerAngle = (270 - degrees + 360) % 360;
-      currentSelectedIndex = Math.floor(pointerAngle / (360 / numSegments));
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('questionCard').classList.remove('active');
+            document.getElementById('answerText').style.display = 'none';
+            clearInterval(timerInterval);
 
-      const selected = activeQuestions[currentSelectedIndex];
-      const t = translations[currentLang];
+            const numOptions = activeQuestions.length;
+            const selectedIndex = Math.floor(Math.random() * numOptions);
+            selectedQuestion = activeQuestions[selectedIndex];
 
-      questionTitle.innerText = selected.label;
-      questionText.innerText = selected.text;
-      answerBox.innerText = t.answerPrefix + (selected.answer || t.noAnswer);
-      answerBox.style.display = "none";
-      quizBox.style.display = "block";
-    }
+            const sliceAngle = 360 / numOptions;
+            const targetDegrees = 360 - (selectedIndex * sliceAngle) - (sliceAngle / 2);
+            const extraRounds = 360 * 5;
+            
+            currentRotation += extraRounds + targetDegrees - (currentRotation % 360);
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
 
-    questionClickable.addEventListener("click", () => {
-      answerBox.style.display = (answerBox.style.display === "none") ? "block" : "none";
-    });
+            setTimeout(() => {
+                isSpinning = false;
+                document.getElementById('spinBtn').disabled = false;
+                showQuestion(selectedQuestion, selectedIndex);
+            }, 4000);
+        }
 
-    adminLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      const t = translations[currentLang];
-      const enteredPassword = prompt(t.passPrompt);
+        function showQuestion(q, index) {
+            document.getElementById('questionText').innerText = q.question;
+            document.getElementById('answerText').innerText = q.answer;
+            document.getElementById('questionCard').classList.add('active');
 
-      if (enteredPassword === ADMIN_PASSWORD) {
-        sessionStorage.setItem("quizAdminAuth", "true");
-        window.location.href = "admin.html";
-      } else if (enteredPassword !== null) {
-        alert(t.passError);
-      }
-    });
+            if (removeOnSpin) {
+                activeQuestions.splice(index, 1);
+                setTimeout(() => drawWheel(), 500);
+            }
 
-    langSelect.addEventListener("change", (e) => applyLanguage(e.target.value));
-    spinBtn.addEventListener("click", spin);
-    resetBtn.addEventListener("click", resetWheel);
+            if (timerSeconds > 0) {
+                startTimer(timerSeconds);
+            } else {
+                document.getElementById('timerDisplay').innerText = '';
+            }
+        }
 
-    applyLanguage(currentLang);
-  </script>
+        function startTimer(seconds) {
+            let left = seconds;
+            const display = document.getElementById('timerDisplay');
+            display.innerText = `⏱️ ${left}s`;
+
+            timerInterval = setInterval(() => {
+                left--;
+                display.innerText = `⏱️️ ${left}s`;
+                if (left <= 0) {
+                    clearInterval(timerInterval);
+                    display.innerText = "⏰ Czas minął!";
+                }
+            }, 1000);
+        }
+
+        function toggleAnswer() {
+            const answerBox = document.getElementById('answerText');
+            answerBox.style.display = answerBox.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function resetQuestions() {
+            activeQuestions = [...questions];
+            drawWheel();
+            document.getElementById('questionCard').classList.remove('active');
+            alert("Zresetowano koło! Wszystkie pytania wracają do gry.");
+        }
+
+        init();
+    </script>
 </body>
 </html>
