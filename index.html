@@ -45,11 +45,30 @@
       cursor: pointer;
     }
 
+    .controls-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .reset-btn {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #e67e22;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .reset-btn:hover { background-color: #d35400; }
+
     .wheel-container {
       position: relative;
       width: 320px;
       height: 320px;
-      margin-top: 20px;
+      margin-top: 15px;
     }
 
     .pointer {
@@ -73,7 +92,6 @@
     }
 
     button.spin-btn {
-      margin-top: 25px;
       padding: 12px 24px;
       font-size: 18px;
       font-weight: bold;
@@ -88,7 +106,7 @@
     button.spin-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 
     .quiz-box {
-      margin-top: 25px;
+      margin-top: 20px;
       padding: 20px;
       max-width: 400px;
       width: 90%;
@@ -97,12 +115,11 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       text-align: center;
       display: none;
-      cursor: pointer;
-      user-select: none;
     }
 
-    .quiz-box:hover {
-      background-color: #fcfcfc;
+    .question-content {
+      cursor: pointer;
+      user-select: none;
     }
 
     .hint {
@@ -119,6 +136,25 @@
       border: 1px solid #2ecc71;
       border-radius: 6px;
       color: #27ae60;
+      font-weight: bold;
+      display: none;
+    }
+
+    .remove-option {
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px dashed #ddd;
+      font-size: 13px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .empty-message {
+      margin-top: 15px;
+      color: #e74c3c;
       font-weight: bold;
       display: none;
     }
@@ -142,17 +178,28 @@
     <canvas id="canvas" width="400" height="400"></canvas>
   </div>
 
-  <button id="spin-btn" class="spin-btn">Zakręć kołem!</button>
+  <div class="controls-bar">
+    <button id="spin-btn" class="spin-btn">Zakręć kołem!</button>
+    <button id="reset-btn" class="reset-btn">🔄 Zacznij od nowa</button>
+  </div>
+
+  <div id="empty-msg" class="empty-message">Wszystkie pytania zostały wylosowane! Kliknij "Zacznij od nowa".</div>
 
   <div id="quiz-box" class="quiz-box">
-    <h3 id="question-title">Pytanie</h3>
-    <p id="question-text"></p>
-    <div id="hint-text" class="hint">👇 Kliknij tutaj, aby zobaczyć odpowiedź</div>
-    <div id="answer-box" class="answer-box"></div>
+    <div id="question-clickable" class="question-content">
+      <h3 id="question-title">Pytanie</h3>
+      <p id="question-text"></p>
+      <div id="hint-text" class="hint">👇 Kliknij tutaj, aby zobaczyć odpowiedź</div>
+      <div id="answer-box" class="answer-box"></div>
+    </div>
+
+    <div class="remove-option">
+      <input type="checkbox" id="remove-check">
+      <label for="remove-check" id="remove-label">Usuń to pytanie z koła po wylosowaniu</label>
+    </div>
   </div>
 
   <script>
-    // --- HASŁO DO PANELU EDYCJI ---
     const ADMIN_PASSWORD = "1111";
 
     const translations = {
@@ -160,9 +207,12 @@
         title: "Quiz - Zakręć Kołem!",
         adminLink: "⚙️ Panel edycji",
         spinBtn: "Zakręć kołem!",
+        resetBtn: "🔄 Zacznij od nowa",
         hint: "👇 Kliknij tutaj, aby zobaczyć odpowiedź",
         answerPrefix: "Odpowiedź: ",
         noAnswer: "Brak zdefiniowanej odpowiedzi.",
+        removeLabel: "Usuń to pytanie z koła po wylosowaniu",
+        emptyMsg: "Wszystkie pytania zostały wylosowane! Kliknij \"Zacznij od nowa\".",
         passPrompt: "Podaj hasło do panelu edycji:",
         passError: "Niepoprawne hasło!"
       },
@@ -170,9 +220,12 @@
         title: "Quiz - Spin the Wheel!",
         adminLink: "⚙️ Edit Panel",
         spinBtn: "Spin the wheel!",
+        resetBtn: "🔄 Start over",
         hint: "👇 Click here to see the answer",
         answerPrefix: "Answer: ",
         noAnswer: "No answer defined.",
+        removeLabel: "Remove this question from wheel",
+        emptyMsg: "All questions have been drawn! Click \"Start over\".",
         passPrompt: "Enter password for admin panel:",
         passError: "Incorrect password!"
       },
@@ -180,9 +233,12 @@
         title: "クイズ - ルーレットを回そう！",
         adminLink: "⚙️ 編集パネル",
         spinBtn: "ルーレットを回す！",
+        resetBtn: "🔄 最初からやり直す",
         hint: "👇 クリックして回答を表示",
         answerPrefix: "答え: ",
         noAnswer: "回答が設定されていません。",
+        removeLabel: "この質問をルーレットから除外する",
+        emptyMsg: "すべての質問が終了しました！「最初からやり直す」をクリックしてください。",
         passPrompt: "編集パネルのパスワードを入力してください:",
         passError: "パスワードが正しくありません！"
       }
@@ -209,20 +265,34 @@
       ]
     };
 
-    let currentLang = localStorage.getItem("quizLang") || "pl";
-    let questions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
+    function detectBrowserLanguage() {
+      const userLang = (navigator.language || navigator.userLanguage || "").toLowerCase();
+      if (userLang.startsWith("ja")) return "ja";
+      if (userLang.startsWith("en")) return "en";
+      return "pl";
+    }
+
+    let currentLang = localStorage.getItem("quizLang") || detectBrowserLanguage();
+    let allQuestions = [];
+    let activeQuestions = [];
+    let currentSelectedIndex = null;
 
     const langSelect = document.getElementById("lang-select");
     const mainTitle = document.getElementById("main-title");
     const adminLink = document.getElementById("admin-link");
     const spinBtn = document.getElementById("spin-btn");
+    const resetBtn = document.getElementById("reset-btn");
     const hintText = document.getElementById("hint-text");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     const quizBox = document.getElementById("quiz-box");
+    const questionClickable = document.getElementById("question-clickable");
     const questionTitle = document.getElementById("question-title");
     const questionText = document.getElementById("question-text");
     const answerBox = document.getElementById("answer-box");
+    const removeCheck = document.getElementById("remove-check");
+    const removeLabel = document.getElementById("remove-label");
+    const emptyMsg = document.getElementById("empty-msg");
 
     let currentAngle = 0;
     let isSpinning = false;
@@ -236,18 +306,36 @@
       mainTitle.innerText = t.title;
       adminLink.innerText = t.adminLink;
       spinBtn.innerText = t.spinBtn;
+      resetBtn.innerText = t.resetBtn;
       hintText.innerText = t.hint;
+      removeLabel.innerText = t.removeLabel;
+      emptyMsg.innerText = t.emptyMsg;
 
-      questions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
+      resetWheel();
+    }
+
+    function resetWheel() {
+      allQuestions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
+      activeQuestions = [...allQuestions];
       quizBox.style.display = "none";
       answerBox.style.display = "none";
+      emptyMsg.style.display = "none";
+      spinBtn.disabled = false;
       drawWheel();
     }
 
     function drawWheel() {
-      const numSegments = questions.length;
+      const numSegments = activeQuestions.length;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (numSegments === 0) return;
+
+      if (numSegments === 0) {
+        spinBtn.disabled = true;
+        emptyMsg.style.display = "block";
+        return;
+      }
+
+      emptyMsg.style.display = "none";
+      spinBtn.disabled = false;
 
       const arcSize = (2 * Math.PI) / numSegments;
       const radius = canvas.width / 2;
@@ -255,7 +343,7 @@
       for (let i = 0; i < numSegments; i++) {
         const angle = currentAngle + i * arcSize;
         ctx.beginPath();
-        ctx.fillStyle = questions[i].color;
+        ctx.fillStyle = activeQuestions[i].color;
         ctx.moveTo(radius, radius);
         ctx.arc(radius, radius, radius, angle, angle + arcSize);
         ctx.lineTo(radius, radius);
@@ -267,13 +355,26 @@
         ctx.textAlign = "right";
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px Arial";
-        ctx.fillText(questions[i].label, radius - 20, 6);
+        ctx.fillText(activeQuestions[i].label, radius - 20, 6);
         ctx.restore();
       }
     }
 
     function spin() {
-      if (isSpinning || questions.length === 0) return;
+      if (isSpinning || activeQuestions.length === 0) return;
+
+      // Jeśli wybrano usunięcie poprzedniego pytania, usuwamy je przed nowym losem
+      if (currentSelectedIndex !== null && removeCheck.checked) {
+        activeQuestions.splice(currentSelectedIndex, 1);
+        currentSelectedIndex = null;
+        if (activeQuestions.length === 0) {
+          quizBox.style.display = "none";
+          drawWheel();
+          return;
+        }
+      }
+
+      removeCheck.checked = false;
       isSpinning = true;
       spinBtn.disabled = true;
       quizBox.style.display = "none";
@@ -304,12 +405,12 @@
     }
 
     function showResult() {
-      const numSegments = questions.length;
+      const numSegments = activeQuestions.length;
       const degrees = (currentAngle * 180 / Math.PI) % 360;
       const pointerAngle = (270 - degrees + 360) % 360;
-      const index = Math.floor(pointerAngle / (360 / numSegments));
+      currentSelectedIndex = Math.floor(pointerAngle / (360 / numSegments));
 
-      const selected = questions[index];
+      const selected = activeQuestions[currentSelectedIndex];
       const t = translations[currentLang];
 
       questionTitle.innerText = selected.label;
@@ -319,11 +420,10 @@
       quizBox.style.display = "block";
     }
 
-    quizBox.addEventListener("click", () => {
+    questionClickable.addEventListener("click", () => {
       answerBox.style.display = (answerBox.style.display === "none") ? "block" : "none";
     });
 
-    // Przejście do panelu z prośbą o hasło
     adminLink.addEventListener("click", (e) => {
       e.preventDefault();
       const t = translations[currentLang];
@@ -339,6 +439,7 @@
 
     langSelect.addEventListener("change", (e) => applyLanguage(e.target.value));
     spinBtn.addEventListener("click", spin);
+    resetBtn.addEventListener("click", resetWheel);
 
     applyLanguage(currentLang);
   </script>
