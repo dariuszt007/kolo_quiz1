@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Edycji Pytań / Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 650px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .nav-link {
+      color: #3498db;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .lang-select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .form-group {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button.add-btn {
+      margin-top: 15px;
+      padding: 10px 18px;
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button.add-btn:hover { background-color: #27ae60; }
+
+    .question-item {
+      background: #fff;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .delete-btn:hover { background-color: #c0392b; }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="index.html" id="back-link" class="nav-link">← Powrót do ruletki</a>
+    <select id="lang-select" class="lang-select">
+      <option value="pl">🇵🇱 Polski</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="ja">🇯🇵 日本語</option>
+    </select>
+  </div>
+
+  <h1 id="page-title">Panel Zarządzania Pytaniami</h1>
+
+  <div class="form-group">
+    <h3 id="form-title">Dodaj nowe pytanie</h3>
+    <label id="lbl-label" for="label">Etykieta na kole:</label>
+    <input type="text" id="label">
+
+    <label id="lbl-text" for="text">Treść pytania:</label>
+    <textarea id="text" rows="3"></textarea>
+
+    <label id="lbl-answer" for="answer">Odpowiedź:</label>
+    <input type="text" id="answer">
+
+    <label id="lbl-color" for="color">Kolor pola na kole:</label>
+    <input type="color" id="color" value="#3498db">
+
+    <button id="add-btn" class="add-btn">Dodaj pytanie</button>
+  </div>
+
+  <h2><span id="list-title">Lista pytań</span> (<span id="count">0</span>)</h2>
+  <div id="questions-list"></div>
+
+  <script>
+    const translations = {
+      pl: {
+        backLink: "← Powrót do ruletki",
+        pageTitle: "Panel Zarządzania Pytaniami",
+        formTitle: "Dodaj nowe pytanie",
+        lblLabel: "Etykieta na kole (np. Pytanie 5):",
+        lblText: "Treść pytania:",
+        lblAnswer: "Odpowiedź:",
+        lblColor: "Kolor pola na kole:",
+        addBtn: "Dodaj pytanie",
+        listTitle: "Lista pytań",
+        phLabel: "np. Geografia 1",
+        phText: "Wpisz treść pytania...",
+        phAnswer: "Wpisz prawidłową odpowiedź...",
+        alertFill: "Wypełnij wszystkie pola!",
+        deleteBtn: "Usuń",
+        qPrefix: "P: ",
+        aPrefix: "O: ",
+        noAns: "Brak"
+      },
+      en: {
+        backLink: "← Back to wheel",
+        pageTitle: "Question Management Panel",
+        formTitle: "Add new question",
+        lblLabel: "Wheel Label (e.g. Q1):",
+        lblText: "Question Text:",
+        lblAnswer: "Answer:",
+        lblColor: "Wheel Segment Color:",
+        addBtn: "Add question",
+        listTitle: "Question List",
+        phLabel: "e.g. Geography 1",
+        phText: "Enter the question...",
+        phAnswer: "Enter the correct answer...",
+        alertFill: "Please fill in all fields!",
+        deleteBtn: "Delete",
+        qPrefix: "Q: ",
+        aPrefix: "A: ",
+        noAns: "None"
+      },
+      ja: {
+        backLink: "← ルーレットに戻る",
+        pageTitle: "質問管理パネル",
+        formTitle: "新しい質問を追加",
+        lblLabel: "ホイール上のラベル (例: 質問1):",
+        lblText: "質問の本文:",
+        lblAnswer: "回答:",
+        lblColor: "セグメントの色:",
+        addBtn: "質問を追加",
+        listTitle: "質問一覧",
+        phLabel: "例: 地理 1",
+        phText: "質問を入力してください...",
+        phAnswer: "正解を入力してください...",
+        alertFill: "すべての項目を入力してください！",
+        deleteBtn: "削除",
+        qPrefix: "問: ",
+        aPrefix: "答: ",
+        noAns: "なし"
+      }
+    };
+
+    const defaultQuestions = {
+      pl: [
+        { label: "Pytanie 1", color: "#3498db", text: "Jaka jest stolica Japonii?", answer: "Tokio" },
+        { label: "Pytanie 2", color: "#e67e22", text: "Ile dni ma rok przestępny?", answer: "366 dni" },
+        { label: "Pytanie 3", color: "#9b59b6", text: "Jaki jest największy ocean na Ziemi?", answer: "Ocean Spokojny (Pacyfik)" },
+        { label: "Pytanie 4", color: "#f1c40f", text: "Kto napisał 'Pana Tadeusza'?", answer: "Adam Mickiewicz" }
+      ],
+      en: [
+        { label: "Question 1", color: "#3498db", text: "What is the capital of Japan?", answer: "Tokyo" },
+        { label: "Question 2", color: "#e67e22", text: "How many days are in a leap year?", answer: "366 days" },
+        { label: "Question 3", color: "#9b59b6", text: "What is the largest ocean on Earth?", answer: "Pacific Ocean" },
+        { label: "Question 4", color: "#f1c40f", text: "Who painted the Mona Lisa?", answer: "Leonardo da Vinci" }
+      ],
+      ja: [
+        { label: "質問 1", color: "#3498db", text: "日本の首都はどこですか？", answer: "東京" },
+        { label: "質問 2", color: "#e67e22", text: "うるう年は一年で何日ありますか？", answer: "366日" },
+        { label: "質問 3", color: "#9b59b6", text: "地球上で最も広い大洋は何ですか？", answer: "太平洋" },
+        { label: "質問 4", color: "#f1c40f", text: "モナ・リザを描いたのは誰ですか？", answer: "レオナルド・ダ・ヴィンチ" }
+      ]
+    };
+
+    let currentLang = localStorage.getItem("quizLang") || "pl";
+    let questions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
+
+    const langSelect = document.getElementById("lang-select");
+    const backLink = document.getElementById("back-link");
+    const pageTitle = document.getElementById("page-title");
+    const formTitle = document.getElementById("form-title");
+    const lblLabel = document.getElementById("lbl-label");
+    const lblText = document.getElementById("lbl-text");
+    const lblAnswer = document.getElementById("lbl-answer");
+    const lblColor = document.getElementById("lbl-color");
+    const addBtn = document.getElementById("add-btn");
+    const listTitle = document.getElementById("list-title");
+
+    const labelInput = document.getElementById("label");
+    const textInput = document.getElementById("text");
+    const answerInput = document.getElementById("answer");
+    const colorInput = document.getElementById("color");
+    const questionsList = document.getElementById("questions-list");
+    const countSpan = document.getElementById("count");
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem("quizLang", lang);
+      langSelect.value = lang;
+
+      const t = translations[lang];
+      backLink.innerText = t.backLink;
+      pageTitle.innerText = t.pageTitle;
+      formTitle.innerText = t.formTitle;
+      lblLabel.innerText = t.lblLabel;
+      lblText.innerText = t.lblText;
+      lblAnswer.innerText = t.lblAnswer;
+      lblColor.innerText = t.lblColor;
+      addBtn.innerText = t.addBtn;
+      listTitle.innerText = t.listTitle;
+
+      labelInput.placeholder = t.phLabel;
+      textInput.placeholder = t.phText;
+      answerInput.placeholder = t.phAnswer;
+
+      questions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
+      renderList();
+    }
+
+    function saveAndRender() {
+      localStorage.setItem("quizQuestions_" + currentLang, JSON.stringify(questions));
+      renderList();
+    }
+
+    function renderList() {
+      const t = translations[currentLang];
+      questionsList.innerHTML = "";
+      countSpan.innerText = questions.length;
+
+      questions.forEach((q, index) => {
+        const item = document.createElement("div");
+        item.className = "question-item";
+        item.style.borderLeft = `8px solid ${q.color}`;
+
+        item.innerHTML = `
+          <div>
+            <strong>${q.label}</strong>
+            <p style="margin: 5px 0 0 0; color: #333;"><strong>${t.qPrefix}</strong>${q.text}</p>
+            <p style="margin: 3px 0 0 0; color: #27ae60;"><strong>${t.aPrefix}</strong>${q.answer || t.noAns}</p>
+          </div>
+          <button class="delete-btn" onclick="deleteQuestion(${index})">${t.deleteBtn}</button>
+        `;
+
+        questionsList.appendChild(item);
+      });
+    }
+
+    addBtn.addEventListener("click", () => {
+      const t = translations[currentLang];
+      const label = labelInput.value.trim();
+      const text = textInput.value.trim();
+      const answer = answerInput.value.trim();
+      const color = colorInput.value;
+
+      if (!label || !text || !answer) {
+        alert(t.alertFill);
+        return;
+      }
+
+      questions.push({ label, text, answer, color });
+      saveAndRender();
+
+      labelInput.value = "";
+      textInput.value = "";
+      answerInput.value = "";
+    });
+
+    window.deleteQuestion = function(index) {
+      questions.splice(index, 1);
+      saveAndRender();
+    };
+
+    langSelect.addEventListener("change", (e) => applyLanguage(e.target.value));
+
+    applyLanguage(currentLang);
+  </script>
+</body>
+</html>
