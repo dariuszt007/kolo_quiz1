@@ -59,8 +59,13 @@
       border-radius: 4px;
     }
 
-    button.add-btn {
+    .btn-group {
+      display: flex;
+      gap: 10px;
       margin-top: 15px;
+    }
+
+    button.add-btn {
       padding: 10px 18px;
       background-color: #2ecc71;
       color: white;
@@ -72,6 +77,19 @@
 
     button.add-btn:hover { background-color: #27ae60; }
 
+    button.cancel-btn {
+      padding: 10px 18px;
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      display: none;
+    }
+
+    button.cancel-btn:hover { background-color: #7f8c8d; }
+
     .question-item {
       background: #fff;
       padding: 15px;
@@ -82,6 +100,22 @@
       justify-content: space-between;
       align-items: center;
     }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .edit-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .edit-btn:hover { background-color: #d35400; }
 
     .delete-btn {
       background-color: #e74c3c;
@@ -96,6 +130,13 @@
   </style>
 </head>
 <body>
+
+  <script>
+    // Zabezpieczenie przed bezpośrednim wejściem bez podania hasła
+    if (sessionStorage.getItem("quizAdminAuth") !== "true") {
+      window.location.href = "index.html";
+    }
+  </script>
 
   <div class="top-bar">
     <a href="index.html" id="back-link" class="nav-link">← Powrót do ruletki</a>
@@ -122,7 +163,10 @@
     <label id="lbl-color" for="color">Kolor pola na kole:</label>
     <input type="color" id="color" value="#3498db">
 
-    <button id="add-btn" class="add-btn">Dodaj pytanie</button>
+    <div class="btn-group">
+      <button id="add-btn" class="add-btn">Dodaj pytanie</button>
+      <button id="cancel-btn" class="cancel-btn">Anuluj</button>
+    </div>
   </div>
 
   <h2><span id="list-title">Lista pytań</span> (<span id="count">0</span>)</h2>
@@ -133,17 +177,21 @@
       pl: {
         backLink: "← Powrót do ruletki",
         pageTitle: "Panel Zarządzania Pytaniami",
-        formTitle: "Dodaj nowe pytanie",
+        formTitleAdd: "Dodaj nowe pytanie",
+        formTitleEdit: "Edytuj pytanie",
         lblLabel: "Etykieta na kole (np. Pytanie 5):",
         lblText: "Treść pytania:",
         lblAnswer: "Odpowiedź:",
         lblColor: "Kolor pola na kole:",
         addBtn: "Dodaj pytanie",
+        saveBtn: "Zapisz zmiany",
+        cancelBtn: "Anuluj",
         listTitle: "Lista pytań",
         phLabel: "np. Geografia 1",
         phText: "Wpisz treść pytania...",
         phAnswer: "Wpisz prawidłową odpowiedź...",
         alertFill: "Wypełnij wszystkie pola!",
+        editBtn: "Edytuj",
         deleteBtn: "Usuń",
         qPrefix: "P: ",
         aPrefix: "O: ",
@@ -152,17 +200,21 @@
       en: {
         backLink: "← Back to wheel",
         pageTitle: "Question Management Panel",
-        formTitle: "Add new question",
+        formTitleAdd: "Add new question",
+        formTitleEdit: "Edit question",
         lblLabel: "Wheel Label (e.g. Q1):",
         lblText: "Question Text:",
         lblAnswer: "Answer:",
         lblColor: "Wheel Segment Color:",
         addBtn: "Add question",
+        saveBtn: "Save changes",
+        cancelBtn: "Cancel",
         listTitle: "Question List",
         phLabel: "e.g. Geography 1",
         phText: "Enter the question...",
         phAnswer: "Enter the correct answer...",
         alertFill: "Please fill in all fields!",
+        editBtn: "Edit",
         deleteBtn: "Delete",
         qPrefix: "Q: ",
         aPrefix: "A: ",
@@ -171,17 +223,21 @@
       ja: {
         backLink: "← ルーレットに戻る",
         pageTitle: "質問管理パネル",
-        formTitle: "新しい質問を追加",
+        formTitleAdd: "新しい質問を追加",
+        formTitleEdit: "質問を編集",
         lblLabel: "ホイール上のラベル (例: 質問1):",
         lblText: "質問の本文:",
         lblAnswer: "回答:",
         lblColor: "セグメントの色:",
         addBtn: "質問を追加",
+        saveBtn: "変更を保存",
+        cancelBtn: "キャンセル",
         listTitle: "質問一覧",
         phLabel: "例: 地理 1",
         phText: "質問を入力してください...",
         phAnswer: "正解を入力してください...",
         alertFill: "すべての項目を入力してください！",
+        editBtn: "編集",
         deleteBtn: "削除",
         qPrefix: "問: ",
         aPrefix: "答: ",
@@ -212,6 +268,7 @@
 
     let currentLang = localStorage.getItem("quizLang") || "pl";
     let questions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
+    let editingIndex = null; // null = dodawanie, liczba = indeks edytowanego pytania
 
     const langSelect = document.getElementById("lang-select");
     const backLink = document.getElementById("back-link");
@@ -222,6 +279,7 @@
     const lblAnswer = document.getElementById("lbl-answer");
     const lblColor = document.getElementById("lbl-color");
     const addBtn = document.getElementById("add-btn");
+    const cancelBtn = document.getElementById("cancel-btn");
     const listTitle = document.getElementById("list-title");
 
     const labelInput = document.getElementById("label");
@@ -239,20 +297,40 @@
       const t = translations[lang];
       backLink.innerText = t.backLink;
       pageTitle.innerText = t.pageTitle;
-      formTitle.innerText = t.formTitle;
       lblLabel.innerText = t.lblLabel;
       lblText.innerText = t.lblText;
       lblAnswer.innerText = t.lblAnswer;
       lblColor.innerText = t.lblColor;
-      addBtn.innerText = t.addBtn;
+      cancelBtn.innerText = t.cancelBtn;
       listTitle.innerText = t.listTitle;
 
       labelInput.placeholder = t.phLabel;
       textInput.placeholder = t.phText;
       answerInput.placeholder = t.phAnswer;
 
+      if (editingIndex === null) {
+        formTitle.innerText = t.formTitleAdd;
+        addBtn.innerText = t.addBtn;
+      } else {
+        formTitle.innerText = t.formTitleEdit;
+        addBtn.innerText = t.saveBtn;
+      }
+
       questions = JSON.parse(localStorage.getItem("quizQuestions_" + currentLang)) || defaultQuestions[currentLang];
       renderList();
+    }
+
+    function resetForm() {
+      editingIndex = null;
+      const t = translations[currentLang];
+      formTitle.innerText = t.formTitleAdd;
+      addBtn.innerText = t.addBtn;
+      cancelBtn.style.display = "none";
+
+      labelInput.value = "";
+      textInput.value = "";
+      answerInput.value = "";
+      colorInput.value = "#3498db";
     }
 
     function saveAndRender() {
@@ -276,7 +354,10 @@
             <p style="margin: 5px 0 0 0; color: #333;"><strong>${t.qPrefix}</strong>${q.text}</p>
             <p style="margin: 3px 0 0 0; color: #27ae60;"><strong>${t.aPrefix}</strong>${q.answer || t.noAns}</p>
           </div>
-          <button class="delete-btn" onclick="deleteQuestion(${index})">${t.deleteBtn}</button>
+          <div class="actions">
+            <button class="edit-btn" onclick="editQuestion(${index})">${t.editBtn}</button>
+            <button class="delete-btn" onclick="deleteQuestion(${index})">${t.deleteBtn}</button>
+          </div>
         `;
 
         questionsList.appendChild(item);
@@ -295,19 +376,42 @@
         return;
       }
 
-      questions.push({ label, text, answer, color });
-      saveAndRender();
+      if (editingIndex === null) {
+        // Dodawanie nowego pytania
+        questions.push({ label, text, answer, color });
+      } else {
+        // Zapisywanie edytowanego pytania
+        questions[editingIndex] = { label, text, answer, color };
+      }
 
-      labelInput.value = "";
-      textInput.value = "";
-      answerInput.value = "";
+      saveAndRender();
+      resetForm();
     });
 
+    window.editQuestion = function(index) {
+      editingIndex = index;
+      const q = questions[index];
+      const t = translations[currentLang];
+
+      labelInput.value = q.label;
+      textInput.value = q.text;
+      answerInput.value = q.answer || "";
+      colorInput.value = q.color;
+
+      formTitle.innerText = t.formTitleEdit;
+      addBtn.innerText = t.saveBtn;
+      cancelBtn.style.display = "inline-block";
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     window.deleteQuestion = function(index) {
+      if (editingIndex === index) resetForm();
       questions.splice(index, 1);
       saveAndRender();
     };
 
+    cancelBtn.addEventListener("click", resetForm);
     langSelect.addEventListener("change", (e) => applyLanguage(e.target.value));
 
     applyLanguage(currentLang);
