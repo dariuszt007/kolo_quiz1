@@ -42,6 +42,7 @@
       text-decoration: none;
       border-radius: 6px;
       font-size: 14px;
+      cursor: pointer;
     }
 
     .wheel-container {
@@ -131,7 +132,7 @@
       <option value="en">🇬🇧 English</option>
       <option value="ja">🇯🇵 日本語</option>
     </select>
-    <a href="admin.html" id="admin-link" class="nav-link">⚙️ Panel edycji</a>
+    <a id="admin-link" class="nav-link">⚙️ Panel edycji</a>
   </div>
 
   <h1 id="main-title">Quiz - Zakręć Kołem!</h1>
@@ -151,6 +152,9 @@
   </div>
 
   <script>
+    // --- HASŁO DO PANELU EDYCJI ---
+    const ADMIN_PASSWORD = "1111";
+
     const translations = {
       pl: {
         title: "Quiz - Zakręć Kołem!",
@@ -158,7 +162,9 @@
         spinBtn: "Zakręć kołem!",
         hint: "👇 Kliknij tutaj, aby zobaczyć odpowiedź",
         answerPrefix: "Odpowiedź: ",
-        noAnswer: "Brak zdefiniowanej odpowiedzi."
+        noAnswer: "Brak zdefiniowanej odpowiedzi.",
+        passPrompt: "Podaj hasło do panelu edycji:",
+        passError: "Niepoprawne hasło!"
       },
       en: {
         title: "Quiz - Spin the Wheel!",
@@ -166,7 +172,9 @@
         spinBtn: "Spin the wheel!",
         hint: "👇 Click here to see the answer",
         answerPrefix: "Answer: ",
-        noAnswer: "No answer defined."
+        noAnswer: "No answer defined.",
+        passPrompt: "Enter password for admin panel:",
+        passError: "Incorrect password!"
       },
       ja: {
         title: "クイズ - ルーレットを回そう！",
@@ -174,7 +182,9 @@
         spinBtn: "ルーレットを回す！",
         hint: "👇 クリックして回答を表示",
         answerPrefix: "答え: ",
-        noAnswer: "回答が設定されていません。"
+        noAnswer: "回答が設定されていません。",
+        passPrompt: "編集パネルのパスワードを入力してください:",
+        passError: "パスワードが正しくありません！"
       }
     };
 
@@ -311,6 +321,20 @@
 
     quizBox.addEventListener("click", () => {
       answerBox.style.display = (answerBox.style.display === "none") ? "block" : "none";
+    });
+
+    // Przejście do panelu z prośbą o hasło
+    adminLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const t = translations[currentLang];
+      const enteredPassword = prompt(t.passPrompt);
+
+      if (enteredPassword === ADMIN_PASSWORD) {
+        sessionStorage.setItem("quizAdminAuth", "true");
+        window.location.href = "admin.html";
+      } else if (enteredPassword !== null) {
+        alert(t.passError);
+      }
     });
 
     langSelect.addEventListener("change", (e) => applyLanguage(e.target.value));
