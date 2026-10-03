@@ -70,26 +70,22 @@
         const ctx = canvas.getContext('2d');
 
         async function init() {
-            const localData = localStorage.getItem('roulette_questions');
-            
-            if (localData && JSON.parse(localData).length > 0) {
-                questions = JSON.parse(localData);
-            } else {
-                try {
-                    // Bezwzględny adres URL do repozytorium kolo_quiz1 z omijaniem pamięci podręcznej
-                    const jsonUrl = 'https://dariuszt007.github.io/kolo_quiz1/pytania.json?v=' + Date.now();
-                    const res = await fetch(jsonUrl);
-                    if (!res.ok) throw new Error(`Błąd HTTP: ${res.status}`);
-                    questions = await res.json();
-                    localStorage.setItem('roulette_questions', JSON.stringify(questions));
-                } catch (e) {
-                    console.error("Błąd podczas ładowania pliku pytania.json:", e);
-                    alert("Nie udało się pobrać pytań z pliku pytania.json.");
-                }
-            }
-            activeQuestions = [...questions];
-            drawWheel();
-        }
+    try {
+        // Zawsze pobieraj aktualny plik z pytaniami, omijając cache i zapamiętany stan
+        const res = await fetch('./pytania.json?v=' + Date.now());
+        if (!res.ok) throw new Error(`Błąd HTTP: ${res.status}`);
+        
+        questions = await res.json();
+        
+        // Zapisujemy poprawne dane do pamięci
+        localStorage.setItem('roulette_questions', JSON.stringify(questions));
+        activeQuestions = [...questions];
+        drawWheel();
+    } catch (e) {
+        console.error("Błąd podczas ładowania pliku pytania.json:", e);
+        alert("Nie udało się pobrać pytań z pliku pytania.json.");
+    }
+}
 
         function drawWheel() {
             const numOptions = activeQuestions.length;
