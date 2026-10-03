@@ -71,15 +71,20 @@
 
         async function init() {
             const localData = localStorage.getItem('roulette_questions');
-            if (localData) {
+            
+            // Sprawdzamy, czy w localStorage są zapisane pytania i czy lista nie jest pusta
+            if (localData && JSON.parse(localData).length > 0) {
                 questions = JSON.parse(localData);
             } else {
                 try {
-                    const res = await fetch('pytania.json');
+                    // Wczytanie pliku pytania.json ze względnej ścieżki (dla GitHub Pages)
+                    const res = await fetch('./pytania.json');
+                    if (!res.ok) throw new Error(`Błąd sieci: ${res.status}`);
                     questions = await res.json();
                     localStorage.setItem('roulette_questions', JSON.stringify(questions));
                 } catch (e) {
                     console.error("Błąd podczas ładowania pliku pytania.json:", e);
+                    alert("Nie udało się pobrać pytań z pliku pytania.json. Upewnij się, że plik znajduje się w katalogu głównym projektu na GitHubie.");
                 }
             }
             activeQuestions = [...questions];
@@ -176,7 +181,7 @@
 
             timerInterval = setInterval(() => {
                 left--;
-                display.innerText = `⏱️️ ${left}s`;
+                display.innerText = `⏱️ ${left}s`;
                 if (left <= 0) {
                     clearInterval(timerInterval);
                     display.innerText = "⏰ Czas minął!";
