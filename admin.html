@@ -3,161 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Administracyjny - Ruletka</title>
+    <title>Test Admin</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #121212; color: #fff; padding: 20px; display: flex; justify-content: center; }
-        .admin-box { background: #1e1e1e; border-radius: 12px; padding: 25px; width: 100%; max-width: 650px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        h1, h2 { margin-bottom: 15px; }
-        .btn { background-color: #ff9800; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
-        .btn:hover { background-color: #e68a00; }
-        .btn-secondary { background-color: #4caf50; }
-        .btn-danger { background-color: #f44336; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; }
-        .form-group input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #2a2a2a; color: #fff; }
-        .question-item { background: #2a2a2a; padding: 12px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .settings-row { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; }
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        body { font-family: sans-serif; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="admin-box">
-        <div class="top-nav">
-            <h1>⚙️ Panel Admina</h1>
-            <a href="index.html" class="btn">🔙 Powrót do gry</a>
-        </div>
+    <h1>⚙️ Testowy Panel Admina</h1>
+    <p>Strona testowa panelu administracyjnego.</p>
+    <p><a href="index.html">⬅️ Powrót do Strony Główniej</a></p>
 
-        <!-- Logowanie -->
-        <div id="authSection">
-            <div class="form-group">
-                <label for="passwordInput">Podaj hasło administratora:</label>
-                <input type="password" id="passwordInput" placeholder="Wpisz hasło">
-            </div>
-            <button class="btn" onclick="authenticate()">Zaloguj</button>
-        </div>
-
-        <!-- Panel Edycji -->
-        <div id="adminContent" style="display: none;">
-            <div class="settings-row">
-                <label>
-                    <input type="checkbox" id="removeOnSpinToggle" onchange="toggleRemoveSetting(this.checked)">
-                    Usuwaj pytania z koła po ich wylosowaniu
-                </label>
-            </div>
-
-            <div class="settings-row">
-                <label for="timerInput">Czas na odpowiedź (sekundy, 0 = brak):</label>
-                <input type="number" id="timerInput" value="30" min="0" style="width: 80px;" onchange="updateTimerSetting(this.value)">
-            </div>
-
-            <hr style="border-color: #333; margin: 20px 0;">
-
-            <h2>Dodaj Nowe Pytanie</h2>
-            <div class="form-group">
-                <input type="text" id="newQuestionText" placeholder="Treść pytania">
-            </div>
-            <div class="form-group">
-                <input type="text" id="newAnswerText" placeholder="Odpowiedź">
-            </div>
-            <button class="btn btn-secondary" onclick="addQuestion()">Dodaj Pytanie</button>
-
-            <h2 style="margin-top: 25px;">Lista Pytani (<span id="qCount">0</span>)</h2>
-            <div id="questionsList"></div>
-            
-            <button class="btn btn-danger" style="margin-top: 15px; width: 100%;" onclick="resetToJSON()">Przywróć pytania z pytania.json</button>
-        </div>
-    </div>
-
-    <script>
-        let questions = [];
-
-        function authenticate() {
-            const pass = document.getElementById('passwordInput').value;
-            if (pass === '1111') {
-                document.getElementById('authSection').style.display = 'none';
-                document.getElementById('adminContent').style.display = 'block';
-                loadQuestions();
-            } else {
-                alert('Błędne hasło!');
-            }
-        }
-
-        async function loadQuestions() {
-            const localData = localStorage.getItem('roulette_questions');
-            if (localData) {
-                questions = JSON.parse(localData);
-            } else {
-                const res = await fetch('pytania.json');
-                questions = await res.json();
-            }
-            updateAdminUI();
-        }
-
-        function updateAdminUI() {
-            document.getElementById('removeOnSpinToggle').checked = JSON.parse(localStorage.getItem('roulette_remove_on_spin')) || false;
-            document.getElementById('timerInput').value = parseInt(localStorage.getItem('roulette_timer')) || 30;
-            document.getElementById('qCount').innerText = questions.length;
-
-            const listEl = document.getElementById('questionsList');
-            listEl.innerHTML = '';
-
-            questions.forEach((q) => {
-                const item = document.createElement('div');
-                item.className = 'question-item';
-                item.innerHTML = `
-                    <span><strong>P:</strong> ${q.question} <br><strong>O:</strong> ${q.answer}</span>
-                    <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteQuestion(${q.id})">Usuń</button>
-                `;
-                listEl.appendChild(item);
-            });
-        }
-
-        function toggleRemoveSetting(val) {
-            localStorage.setItem('roulette_remove_on_spin', JSON.stringify(val));
-        }
-
-        function updateTimerSetting(val) {
-            localStorage.setItem('roulette_timer', parseInt(val) || 0);
-        }
-
-        function addQuestion() {
-            const qText = document.getElementById('newQuestionText').value.trim();
-            const aText = document.getElementById('newAnswerText').value.trim();
-
-            if (!qText || !aText) {
-                alert('Uzupełnij pole pytania i odpowiedzi!');
-                return;
-            }
-
-            const newQ = { id: Date.now(), question: qText, answer: aText };
-            questions.push(newQ);
-            saveAndReload();
-
-            document.getElementById('newQuestionText').value = '';
-            document.getElementById('newAnswerText').value = '';
-        }
-
-        function deleteQuestion(id) {
-            questions = questions.filter(q => q.id !== id);
-            saveAndReload();
-        }
-
-        function saveAndReload() {
-            localStorage.setItem('roulette_questions', JSON.stringify(questions));
-            updateAdminUI();
-        }
-
-        async function resetToJSON() {
-            if (confirm("Czy na pewno chcesz usunąć zmiany i wczytać domyślne pytania z pliku pytania.json?")) {
-                localStorage.removeItem('roulette_questions');
-                const res = await fetch('pytania.json');
-                questions = await res.json();
-                localStorage.setItem('roulette_questions', JSON.stringify(questions));
-                updateAdminUI();
-            }
-        }
-    </script>
 </body>
 </html>
