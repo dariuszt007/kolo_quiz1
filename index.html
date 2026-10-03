@@ -70,22 +70,31 @@
         const ctx = canvas.getContext('2d');
 
         async function init() {
-    try {
-        // Zawsze pobieraj aktualny plik z pytaniami, omijając cache i zapamiętany stan
-        const res = await fetch('./pytania.json?v=' + Date.now());
-        if (!res.ok) throw new Error(`Błąd HTTP: ${res.status}`);
-        
-        questions = await res.json();
-        
-        // Zapisujemy poprawne dane do pamięci
-        localStorage.setItem('roulette_questions', JSON.stringify(questions));
-        activeQuestions = [...questions];
-        drawWheel();
-    } catch (e) {
-        console.error("Błąd podczas ładowania pliku pytania.json:", e);
-        alert("Nie udało się pobrać pytań z pliku pytania.json.");
-    }
-}
+            try {
+                // Pobieranie pytania.json ze ścieżki względnej z omijaniem pamięci podręcznej (cache-busting)
+                const res = await fetch('./pytania.json?v=' + Date.now());
+                if (!res.ok) throw new Error(`Błąd HTTP: ${res.status}`);
+                
+                questions = await res.json();
+                
+                // Zapisanie aktualnych danych w pamięci podręcznej
+                localStorage.setItem('roulette_questions', JSON.stringify(questions));
+                activeQuestions = [...questions];
+                drawWheel();
+            } catch (e) {
+                console.error("Błąd podczas ładowania pliku pytania.json:", e);
+                
+                // Zabezpieczenie: jeśli pobieranie się nie uda, próbuje odczytać zapisane wcześniej dane z pamięci
+                const localData = localStorage.getItem('roulette_questions');
+                if (localData && JSON.parse(localData).length > 0) {
+                    questions = JSON.parse(localData);
+                    activeQuestions = [...questions];
+                    drawWheel();
+                } else {
+                    alert("Nie udało się pobrać pytań z pliku pytania.json.");
+                }
+            }
+        }
 
         function drawWheel() {
             const numOptions = activeQuestions.length;
@@ -173,7 +182,7 @@
         function startTimer(seconds) {
             let left = seconds;
             const display = document.getElementById('timerDisplay');
-            display.innerText = `⏱️ ${left}s`;
+            display.innerText = `⏱️️ ${left}s`;
 
             timerInterval = setInterval(() => {
                 left--;
