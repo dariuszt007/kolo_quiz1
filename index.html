@@ -3,204 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktywna Ruletka - Quiz</title>
+    <title>Test Ładowania Pytań</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        header { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h1 { font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .btn { background-color: #ff9800; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: transform 0.2s, background-color 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2); text-decoration: none; display: inline-block; }
-        .btn:hover { background-color: #e68a00; transform: translateY(-2px); }
-        .btn-secondary { background-color: #4caf50; }
-        .btn-secondary:hover { background-color: #45a049; }
-        .btn-danger { background-color: #f44336; }
-        .btn-danger:hover { background-color: #da190b; }
-        .main-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; gap: 20px; }
-        .wheel-container { position: relative; width: 320px; height: 320px; margin: 20px 0; }
-        @media (min-width: 600px) { .wheel-container { width: 450px; height: 450px; } }
-        #wheel { width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
-        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff1744; z-index: 10; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5)); }
-        .controls { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .question-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 20px; width: 100%; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: none; }
-        .question-card.active { display: block; }
-        .question-title { font-size: 1.4rem; margin-bottom: 15px; }
-        .timer-display { font-size: 2rem; font-weight: bold; color: #ffeb3b; margin: 10px 0; }
-        .answer-box { background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; display: none; font-size: 1.1rem; }
+        body { font-family: sans-serif; padding: 20px; background: #f0f2f5; }
+        .status { padding: 10px; margin-bottom: 15px; border-radius: 5px; font-weight: bold; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        ul { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        li { margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🎯 Interaktywna Ruletka</h1>
-        <a href="admin.html" class="btn">⚙️ Panel Admina</a>
-    </header>
+    <h1>🧪 Test odczytu pytania.json</h1>
+    <div id="status" class="status">Ładowanie danych...</div>
 
-    <div class="main-container">
-        <div class="wheel-container">
-            <div class="pointer"></div>
-            <canvas id="wheel" width="450" height="450"></canvas>
-        </div>
+    <h2>Wczytane pytania:</h2>
+    <ul id="questionsList"></ul>
 
-        <div class="controls">
-            <button class="btn btn-secondary" id="spinBtn" onclick="spinWheel()">Zakręć Kołem!</button>
-            <button class="btn btn-danger" onclick="resetQuestions()">Resetuj pytania</button>
-        </div>
-
-        <div class="question-card" id="questionCard">
-            <div class="question-title" id="questionText">Pytanie pojawi się tutaj...</div>
-            <div class="timer-display" id="timerDisplay">--</div>
-            <button class="btn" id="showAnswerBtn" onclick="toggleAnswer()">Pokaż odpowiedź</button>
-            <div class="answer-box" id="answerText"></div>
-        </div>
-    </div>
+    <p><a href="admin.html">Przejdź do admin.html</a></p>
 
     <script>
-        let questions = [];
-        let activeQuestions = [];
-        let removeOnSpin = JSON.parse(localStorage.getItem('roulette_remove_on_spin')) || false;
-        let timerSeconds = parseInt(localStorage.getItem('roulette_timer')) || 30;
+        async function loadTest() {
+            const statusDiv = document.getElementById('status');
+            const listDiv = document.getElementById('questionsList');
 
-        let isSpinning = false;
-        let currentRotation = 0;
-        let selectedQuestion = null;
-        let timerInterval = null;
-
-        const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#ff9800', '#ff5722'];
-        const canvas = document.getElementById('wheel');
-        const ctx = canvas.getContext('2d');
-
-        async function init() {
-            const localData = localStorage.getItem('roulette_questions');
-            
-            if (localData && JSON.parse(localData).length > 0) {
-                questions = JSON.parse(localData);
-            } else {
-                try {
-                    // Dodanie parametru cache-busting (?v=Timestamp) zapobiega serwowaniu starych błędów HTTP z pamięci
-                    const res = await fetch('pytania.json?v=' + Date.now());
-                    if (!res.ok) throw new Error(`Błąd HTTP: ${res.status}`);
-                    questions = await res.json();
-                    localStorage.setItem('roulette_questions', JSON.stringify(questions));
-                } catch (e) {
-                    console.error("Błąd podczas ładowania pliku pytania.json:", e);
-                    alert("Nie udało się pobrać pytań z pliku pytania.json.");
-                }
-            }
-            activeQuestions = [...questions];
-            drawWheel();
-        }
-
-        function drawWheel() {
-            const numOptions = activeQuestions.length;
-            if (numOptions === 0) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#fff';
-                ctx.font = '20px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText("Brak pytań! Zresetuj listę.", canvas.width / 2, canvas.height / 2);
-                return;
-            }
-
-            const arcSize = (2 * Math.PI) / numOptions;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = 0; i < numOptions; i++) {
-                const angle = i * arcSize;
-                ctx.beginPath();
-                ctx.fillStyle = colors[i % colors.length];
-                ctx.moveTo(canvas.width / 2, canvas.height / 2);
-                ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 10, angle, angle + arcSize);
-                ctx.lineTo(canvas.width / 2, canvas.height / 2);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.save();
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(angle + arcSize / 2);
-                ctx.textAlign = "right";
-                ctx.fillStyle = "#fff";
-                ctx.font = "bold 16px sans-serif";
+            try {
+                // Wymuszenie braku pamięci podręcznej (cache)
+                const response = await fetch('./pytania.json?v=' + Date.now());
                 
-                let text = activeQuestions[i].question;
-                if (text.length > 18) text = text.substring(0, 15) + '...';
-                
-                ctx.fillText(text, canvas.width / 2 - 30, 5);
-                ctx.restore();
-            }
-        }
-
-        function spinWheel() {
-            if (isSpinning || activeQuestions.length === 0) return;
-
-            isSpinning = true;
-            document.getElementById('spinBtn').disabled = true;
-            document.getElementById('questionCard').classList.remove('active');
-            document.getElementById('answerText').style.display = 'none';
-            clearInterval(timerInterval);
-
-            const numOptions = activeQuestions.length;
-            const selectedIndex = Math.floor(Math.random() * numOptions);
-            selectedQuestion = activeQuestions[selectedIndex];
-
-            const sliceAngle = 360 / numOptions;
-            const targetDegrees = 360 - (selectedIndex * sliceAngle) - (sliceAngle / 2);
-            const extraRounds = 360 * 5;
-            
-            currentRotation += extraRounds + targetDegrees - (currentRotation % 360);
-            canvas.style.transform = `rotate(${currentRotation}deg)`;
-
-            setTimeout(() => {
-                isSpinning = false;
-                document.getElementById('spinBtn').disabled = false;
-                showQuestion(selectedQuestion, selectedIndex);
-            }, 4000);
-        }
-
-        function showQuestion(q, index) {
-            document.getElementById('questionText').innerText = q.question;
-            document.getElementById('answerText').innerText = q.answer;
-            document.getElementById('questionCard').classList.add('active');
-
-            if (removeOnSpin) {
-                activeQuestions.splice(index, 1);
-                setTimeout(() => drawWheel(), 500);
-            }
-
-            if (timerSeconds > 0) {
-                startTimer(timerSeconds);
-            } else {
-                document.getElementById('timerDisplay').innerText = '';
-            }
-        }
-
-        function startTimer(seconds) {
-            let left = seconds;
-            const display = document.getElementById('timerDisplay');
-            display.innerText = `⏱️ ${left}s`;
-
-            timerInterval = setInterval(() => {
-                left--;
-                display.innerText = `⏱️ ${left}s`;
-                if (left <= 0) {
-                    clearInterval(timerInterval);
-                    display.innerText = "⏰ Czas minął!";
+                if (!response.ok) {
+                    throw new Error(`Błąd HTTP: ${response.status} ${response.statusText}`);
                 }
-            }, 1000);
+
+                const data = await response.json();
+
+                statusDiv.className = 'status success';
+                statusDiv.innerText = `✅ Sukces! Plik odczytany poprawnie. Znaleziono pytań: ${data.length}`;
+
+                listDiv.innerHTML = '';
+                data.forEach(q => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<strong>ID ${q.id}:</strong> ${q.question} — <em>(Odp: ${q.answer})</em>`;
+                    listDiv.appendChild(li);
+                });
+
+            } catch (err) {
+                statusDiv.className = 'status error';
+                statusDiv.innerText = `❌ Błąd ładowania: ${err.message}`;
+                console.error(err);
+            }
         }
 
-        function toggleAnswer() {
-            const answerBox = document.getElementById('answerText');
-            answerBox.style.display = answerBox.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function resetQuestions() {
-            activeQuestions = [...questions];
-            drawWheel();
-            document.getElementById('questionCard').classList.remove('active');
-            alert("Zresetowano koło! Wszystkie pytania wracają do gry.");
-        }
-
-        init();
+        loadTest();
     </script>
 </body>
 </html>
