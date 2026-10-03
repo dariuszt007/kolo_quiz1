@@ -1,212 +1,520 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktywna Ruletka - Quiz</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        header { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h1 { font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .btn { background-color: #ff9800; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: transform 0.2s, background-color 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2); text-decoration: none; display: inline-block; }
-        .btn:hover { background-color: #e68a00; transform: translateY(-2px); }
-        .btn-secondary { background-color: #4caf50; }
-        .btn-secondary:hover { background-color: #45a049; }
-        .btn-danger { background-color: #f44336; }
-        .btn-danger:hover { background-color: #da190b; }
-        .main-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; gap: 20px; }
-        .wheel-container { position: relative; width: 320px; height: 320px; margin: 20px 0; }
-        @media (min-width: 600px) { .wheel-container { width: 450px; height: 450px; } }
-        #wheel { width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 0 20px rgba(0,0,0,0.5); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
-        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #ff1744; z-index: 10; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.5)); }
-        .controls { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .question-card { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 20px; width: 100%; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: none; }
-        .question-card.active { display: block; }
-        .question-title { font-size: 1.4rem; margin-bottom: 15px; }
-        .timer-display { font-size: 2rem; font-weight: bold; color: #ffeb3b; margin: 10px 0; }
-        .answer-box { background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; display: none; font-size: 1.1rem; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spadające litery - układanie zdań</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --accent: #22c55e;
+      --accent-2: #38bdf8;
+      --danger: #ef4444;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --letter: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      background: var(--accent-2);
+      color: #0b1020;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    .secondary {
+      background: #334155;
+      color: white;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .card h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+
+    .sentence-display {
+      font-size: 20px;
+      line-height: 1.6;
+      letter-spacing: 1px;
+      word-break: break-word;
+    }
+
+    .target-text {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .game-area {
+      position: relative;
+      height: 60vh;
+      min-height: 420px;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 2px solid rgba(56, 189, 248, 0.3);
+      background:
+        radial-gradient(circle at top, rgba(56,189,248,0.10), transparent 35%),
+        linear-gradient(180deg, rgba(15,23,42,0.85), rgba(2,6,23,1));
+    }
+
+    .letter {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--letter);
+      color: #0f172a;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      transition: transform 0.08s ease;
+    }
+
+    .letter:hover {
+      transform: scale(1.08);
+    }
+
+    .bottom-panel {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .message {
+      min-height: 28px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .message.success {
+      color: var(--accent);
+    }
+
+    .message.error {
+      color: var(--danger);
+    }
+
+    .message.info {
+      color: var(--accent-2);
+    }
+
+    .progress {
+      font-size: 18px;
+      line-height: 1.8;
+      word-break: break-word;
+      background: rgba(255,255,255,0.03);
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .correct-char {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .missing-char {
+      color: #64748b;
+      border-bottom: 2px dashed #475569;
+      padding: 0 2px;
+      margin: 0 1px;
+    }
+
+    .space-char {
+      display: inline-block;
+      width: 12px;
+    }
+
+    .footer-note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    @media (min-width: 900px) {
+      .info-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .bottom-panel {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-
-    <header>
-        <h1>🎯 Interaktywna Ruletka</h1>
-        <a href="admin.html" class="btn">⚙️ Panel Admina</a>
-    </header>
-
-    <div class="main-container">
-        <div class="wheel-container">
-            <div class="pointer"></div>
-            <canvas id="wheel" width="450" height="450"></canvas>
-        </div>
-
-        <div class="controls">
-            <button class="btn btn-secondary" id="spinBtn" onclick="spinWheel()">Zakręć Kołem!</button>
-            <button class="btn btn-danger" onclick="resetQuestions()">Resetuj pytania</button>
-        </div>
-
-        <div class="question-card" id="questionCard">
-            <div class="question-title" id="questionText">Pytanie pojawi się tutaj...</div>
-            <div class="timer-display" id="timerDisplay">--</div>
-            <button class="btn" id="showAnswerBtn" onclick="toggleAnswer()">Pokaż odpowiedź</button>
-            <div class="answer-box" id="answerText"></div>
-        </div>
+  <div class="app">
+    <div class="topbar">
+      <div class="title">Gra: Spadające litery</div>
+      <div class="controls">
+        <button id="nextSentenceBtn">Następne zdanie</button>
+        <button id="restartBtn" class="secondary">Restart zdania</button>
+      </div>
     </div>
 
-    <script>
-        let questions = [];
-        let activeQuestions = [];
-        let removeOnSpin = JSON.parse(localStorage.getItem('roulette_remove_on_spin')) || false;
-        let timerSeconds = parseInt(localStorage.getItem('roulette_timer')) || 30;
+    <div class="info-grid">
+      <div class="card">
+        <h2>Instrukcja</h2>
+        <div>
+          Klikaj tylko w litery, które należą do zdania.  
+          Jeśli klikniesz poprawną literę, zostanie dodana do zdania na dole.  
+          Jeśli klikniesz złą literę, pojawi się komunikat o błędzie.
+        </div>
+      </div>
 
-        let isSpinning = false;
-        let currentRotation = 0;
-        let selectedQuestion = null;
-        let timerInterval = null;
+      <div class="card">
+        <h2>Zdanie do ułożenia</h2>
+        <div class="sentence-display" id="hiddenSentence"></div>
+        <div class="target-text">Student nie widzi rozwiązania, widzi tylko miejsca na litery.</div>
+      </div>
+    </div>
 
-        const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#ff9800', '#ff5722'];
-        const canvas = document.getElementById('wheel');
-        const ctx = canvas.getContext('2d');
+    <div class="game-area" id="gameArea"></div>
 
-        async function init() {
-            try {
-                // Pobieranie pytania.json ze ścieżki względnej z omijaniem pamięci podręcznej (cache-busting)
-                const res = await fetch('./pytania.json?v=' + Date.now());
-                if (!res.ok) throw new Error(`Błąd HTTP: ${res.status}`);
-                
-                questions = await res.json();
-                
-                // Zapisanie aktualnych danych w pamięci podręcznej
-                localStorage.setItem('roulette_questions', JSON.stringify(questions));
-                activeQuestions = [...questions];
-                drawWheel();
-            } catch (e) {
-                console.error("Błąd podczas ładowania pliku pytania.json:", e);
-                
-                // Zabezpieczenie: jeśli pobieranie się nie uda, próbuje odczytać zapisane wcześniej dane z pamięci
-                const localData = localStorage.getItem('roulette_questions');
-                if (localData && JSON.parse(localData).length > 0) {
-                    questions = JSON.parse(localData);
-                    activeQuestions = [...questions];
-                    drawWheel();
-                } else {
-                    alert("Nie udało się pobrać pytań z pliku pytania.json.");
-                }
-            }
+    <div class="bottom-panel">
+      <div class="card">
+        <h2>Budowane zdanie</h2>
+        <div class="progress" id="progressDisplay"></div>
+        <div class="footer-note">Spacje są uzupełniane automatycznie.</div>
+      </div>
+
+      <div class="card">
+        <h2>Komunikat</h2>
+        <div class="message info" id="message">Kliknij poprawną literę.</div>
+        <div class="footer-note" id="statusLine">Postęp: 0%</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sentences = [
+      "I like learning English",
+      "She goes to school every day",
+      "We are reading a good book",
+      "They play football after class",
+      "My friend is very helpful",
+      "This lesson is easy and fun"
+    ];
+
+    const gameArea = document.getElementById("gameArea");
+    const progressDisplay = document.getElementById("progressDisplay");
+    const message = document.getElementById("message");
+    const hiddenSentence = document.getElementById("hiddenSentence");
+    const statusLine = document.getElementById("statusLine");
+    const nextSentenceBtn = document.getElementById("nextSentenceBtn");
+    const restartBtn = document.getElementById("restartBtn");
+
+    let currentSentenceIndex = 0;
+    let currentSentence = "";
+    let currentPosition = 0;
+    let letters = [];
+    let animationId = null;
+    let spawnInterval = null;
+    let gameFinished = false;
+    let letterIdCounter = 0;
+
+    function normalizeChar(char) {
+      return char.toLowerCase();
+    }
+
+    function setMessage(text, type = "info") {
+      message.textContent = text;
+      message.className = "message " + type;
+    }
+
+    function getMaskedSentence(sentence) {
+      return sentence
+        .split("")
+        .map(ch => {
+          if (ch === " ") return " ";
+          return "_";
+        })
+        .join(" ");
+    }
+
+    function renderHiddenSentence() {
+      hiddenSentence.textContent = getMaskedSentence(currentSentence);
+    }
+
+    function renderProgress() {
+      let html = "";
+
+      for (let i = 0; i < currentSentence.length; i++) {
+        const ch = currentSentence[i];
+
+        if (ch === " ") {
+          html += '<span class="space-char"></span>';
+        } else if (i < currentPosition) {
+          html += `<span class="correct-char">${escapeHtml(ch)}</span>`;
+        } else {
+          html += `<span class="missing-char">_</span>`;
+        }
+      }
+
+      progressDisplay.innerHTML = html;
+
+      const visibleChars = currentSentence.replace(/\s/g, "").length;
+      const doneChars = currentSentence.slice(0, currentPosition).replace(/\s/g, "").length;
+      const percent = visibleChars === 0 ? 100 : Math.round((doneChars / visibleChars) * 100);
+      statusLine.textContent = `Postęp: ${percent}%`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function skipSpaces() {
+      while (currentPosition < currentSentence.length && currentSentence[currentPosition] === " ") {
+        currentPosition++;
+      }
+    }
+
+    function createLetterElement(letterObj) {
+      const el = document.createElement("div");
+      el.className = "letter";
+      el.textContent = letterObj.char.toUpperCase();
+      el.style.left = letterObj.x + "px";
+      el.style.top = letterObj.y + "px";
+      el.dataset.id = letterObj.id;
+
+      el.addEventListener("click", () => handleLetterClick(letterObj.id));
+      gameArea.appendChild(el);
+      letterObj.element = el;
+    }
+
+    function spawnLetter() {
+      if (gameFinished) return;
+
+      const charsPool = "abcdefghijklmnopqrstuvwxyz";
+      let nextExpected = currentSentence[currentPosition];
+
+      if (!nextExpected || nextExpected === " ") {
+        skipSpaces();
+        nextExpected = currentSentence[currentPosition];
+      }
+
+      let useCorrectLetter = Math.random() < 0.45 && nextExpected && nextExpected !== " ";
+      let char = useCorrectLetter
+        ? normalizeChar(nextExpected)
+        : charsPool[Math.floor(Math.random() * charsPool.length)];
+
+      const width = gameArea.clientWidth;
+      const x = Math.max(0, Math.floor(Math.random() * (width - 56)));
+      const speed = 0.8 + Math.random() * 1.6;
+
+      const letterObj = {
+        id: ++letterIdCounter,
+        char,
+        x,
+        y: -50,
+        speed,
+        element: null
+      };
+
+      letters.push(letterObj);
+      createLetterElement(letterObj);
+    }
+
+    function handleLetterClick(id) {
+      if (gameFinished) return;
+
+      const index = letters.findIndex(l => l.id === id);
+      if (index === -1) return;
+
+      skipSpaces();
+
+      const clickedLetter = letters[index];
+      const expectedChar = currentSentence[currentPosition];
+
+      if (expectedChar && normalizeChar(clickedLetter.char) === normalizeChar(expectedChar)) {
+        removeLetter(clickedLetter.id);
+        currentPosition++;
+        skipSpaces();
+        renderProgress();
+
+        if (currentPosition >= currentSentence.length) {
+          finishGame();
+        } else {
+          setMessage("Dobrze! To poprawna litera.", "success");
+        }
+      } else {
+        removeLetter(clickedLetter.id);
+        setMessage(
+          `Błąd! Ta litera nie pasuje w tym miejscu zdania.`,
+          "error"
+        );
+      }
+    }
+
+    function removeLetter(id) {
+      const index = letters.findIndex(l => l.id === id);
+      if (index === -1) return;
+
+      const [letter] = letters.splice(index, 1);
+      if (letter.element && letter.element.parentNode) {
+        letter.element.parentNode.removeChild(letter.element);
+      }
+    }
+
+    function updateLetters() {
+      const height = gameArea.clientHeight;
+
+      for (let i = letters.length - 1; i >= 0; i--) {
+        const letter = letters[i];
+        letter.y += letter.speed;
+
+        if (letter.element) {
+          letter.element.style.top = letter.y + "px";
         }
 
-        function drawWheel() {
-            const numOptions = activeQuestions.length;
-            if (numOptions === 0) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#fff';
-                ctx.font = '20px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText("Brak pytań! Zresetuj listę.", canvas.width / 2, canvas.height / 2);
-                return;
-            }
-
-            const arcSize = (2 * Math.PI) / numOptions;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = 0; i < numOptions; i++) {
-                const angle = i * arcSize;
-                ctx.beginPath();
-                ctx.fillStyle = colors[i % colors.length];
-                ctx.moveTo(canvas.width / 2, canvas.height / 2);
-                ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 10, angle, angle + arcSize);
-                ctx.lineTo(canvas.width / 2, canvas.height / 2);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.save();
-                ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(angle + arcSize / 2);
-                ctx.textAlign = "right";
-                ctx.fillStyle = "#fff";
-                ctx.font = "bold 16px sans-serif";
-                
-                let text = activeQuestions[i].question;
-                if (text.length > 18) text = text.substring(0, 15) + '...';
-                
-                ctx.fillText(text, canvas.width / 2 - 30, 5);
-                ctx.restore();
-            }
+        if (letter.y > height) {
+          removeLetter(letter.id);
         }
+      }
 
-        function spinWheel() {
-            if (isSpinning || activeQuestions.length === 0) return;
+      animationId = requestAnimationFrame(updateLetters);
+    }
 
-            isSpinning = true;
-            document.getElementById('spinBtn').disabled = true;
-            document.getElementById('questionCard').classList.remove('active');
-            document.getElementById('answerText').style.display = 'none';
-            clearInterval(timerInterval);
-
-            const numOptions = activeQuestions.length;
-            const selectedIndex = Math.floor(Math.random() * numOptions);
-            selectedQuestion = activeQuestions[selectedIndex];
-
-            const sliceAngle = 360 / numOptions;
-            const targetDegrees = 360 - (selectedIndex * sliceAngle) - (sliceAngle / 2);
-            const extraRounds = 360 * 5;
-            
-            currentRotation += extraRounds + targetDegrees - (currentRotation % 360);
-            canvas.style.transform = `rotate(${currentRotation}deg)`;
-
-            setTimeout(() => {
-                isSpinning = false;
-                document.getElementById('spinBtn').disabled = false;
-                showQuestion(selectedQuestion, selectedIndex);
-            }, 4000);
+    function clearLetters() {
+      letters.forEach(letter => {
+        if (letter.element && letter.element.parentNode) {
+          letter.element.parentNode.removeChild(letter.element);
         }
+      });
+      letters = [];
+    }
 
-        function showQuestion(q, index) {
-            document.getElementById('questionText').innerText = q.question;
-            document.getElementById('answerText').innerText = q.answer;
-            document.getElementById('questionCard').classList.add('active');
+    function finishGame() {
+      gameFinished = true;
+      setMessage("Brawo! Udało się ułożyć całe zdanie.", "success");
+      renderProgress();
+      stopGameLoop();
+    }
 
-            if (removeOnSpin) {
-                activeQuestions.splice(index, 1);
-                setTimeout(() => drawWheel(), 500);
-            }
+    function stopGameLoop() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      if (spawnInterval) {
+        clearInterval(spawnInterval);
+        spawnInterval = null;
+      }
+    }
 
-            if (timerSeconds > 0) {
-                startTimer(timerSeconds);
-            } else {
-                document.getElementById('timerDisplay').innerText = '';
-            }
+    function startGameLoop() {
+      stopGameLoop();
+      animationId = requestAnimationFrame(updateLetters);
+      spawnInterval = setInterval(spawnLetter, 900);
+    }
+
+    function loadSentence(index) {
+      stopGameLoop();
+      clearLetters();
+
+      currentSentenceIndex = index;
+      currentSentence = sentences[currentSentenceIndex];
+      currentPosition = 0;
+      gameFinished = false;
+
+      skipSpaces();
+      renderHiddenSentence();
+      renderProgress();
+      setMessage("Kliknij poprawną literę.", "info");
+      startGameLoop();
+    }
+
+    nextSentenceBtn.addEventListener("click", () => {
+      const nextIndex = (currentSentenceIndex + 1) % sentences.length;
+      loadSentence(nextIndex);
+    });
+
+    restartBtn.addEventListener("click", () => {
+      loadSentence(currentSentenceIndex);
+    });
+
+    window.addEventListener("resize", () => {
+      letters.forEach(letter => {
+        const maxX = Math.max(0, gameArea.clientWidth - 56);
+        if (letter.x > maxX) {
+          letter.x = maxX;
+          if (letter.element) {
+            letter.element.style.left = letter.x + "px";
+          }
         }
+      });
+    });
 
-        function startTimer(seconds) {
-            let left = seconds;
-            const display = document.getElementById('timerDisplay');
-            display.innerText = `⏱️️ ${left}s`;
-
-            timerInterval = setInterval(() => {
-                left--;
-                display.innerText = `⏱️ ${left}s`;
-                if (left <= 0) {
-                    clearInterval(timerInterval);
-                    display.innerText = "⏰ Czas minął!";
-                }
-            }, 1000);
-        }
-
-        function toggleAnswer() {
-            const answerBox = document.getElementById('answerText');
-            answerBox.style.display = answerBox.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function resetQuestions() {
-            activeQuestions = [...questions];
-            drawWheel();
-            document.getElementById('questionCard').classList.remove('active');
-            alert("Zresetowano koło! Wszystkie pytania wracają do gry.");
-        }
-
-        init();
-    </script>
-</body>
+    loadSentence(0);
+  </script>
 </html>
