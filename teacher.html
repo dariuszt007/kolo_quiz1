@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel nauczyciela - generator linku</title>
+  <title>teacher.html - Panel nauczyciela v2</title>
   <style>
     :root{
       --bg:#0f172a;
@@ -23,13 +23,13 @@
     body{
       margin:0;
       font-family:Arial,sans-serif;
-      color:var(--text);
       background:linear-gradient(180deg,#0f172a 0%,#111827 100%);
+      color:var(--text);
       min-height:100vh;
     }
 
     .container{
-      max-width:1150px;
+      max-width:1200px;
       margin:0 auto;
       padding:20px;
     }
@@ -65,21 +65,19 @@
 
     @media (min-width:980px){
       .grid{
-        grid-template-columns:1.1fr .9fr;
+        grid-template-columns:1.15fr .85fr;
       }
     }
 
     .card{
-      background:rgba(17,24,39,.92);
+      background:rgba(17,24,39,.94);
       border:1px solid var(--border);
       border-radius:16px;
       padding:16px;
       box-shadow:0 8px 20px rgba(0,0,0,.24);
     }
 
-    h1,h2,h3{
-      margin-top:0;
-    }
+    h1,h2,h3{margin-top:0}
 
     label{
       display:block;
@@ -87,7 +85,7 @@
       font-weight:bold;
     }
 
-    textarea, input{
+    textarea, input, select{
       width:100%;
       border-radius:12px;
       border:1px solid var(--border);
@@ -98,9 +96,22 @@
     }
 
     textarea{
-      min-height:220px;
+      min-height:260px;
       resize:vertical;
       line-height:1.5;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    @media (min-width:700px){
+      .row{
+        grid-template-columns:1fr 1fr;
+      }
     }
 
     .actions{
@@ -141,7 +152,7 @@
       line-height:1.6;
     }
 
-    .sentence-item{
+    .sentence-item, .setting-item{
       background:rgba(255,255,255,.03);
       border:1px solid rgba(255,255,255,.06);
       border-radius:10px;
@@ -153,15 +164,21 @@
       margin-top:12px;
     }
 
-    .link-box{
-      margin-top:14px;
+    .json-output{
+      min-height:220px;
+      font-family:Consolas, monospace;
     }
 
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
+    .pill{
+      display:inline-block;
+      background:rgba(56,189,248,.12);
+      color:#bae6fd;
+      border:1px solid rgba(56,189,248,.25);
+      border-radius:999px;
+      padding:4px 10px;
+      font-size:12px;
+      margin-right:8px;
+      margin-bottom:8px;
     }
 
     code{
@@ -169,91 +186,164 @@
       padding:2px 6px;
       border-radius:6px;
     }
-
-    .warning-box{
-      margin-top:14px;
-      padding:12px;
-      border-radius:12px;
-      background:rgba(245,158,11,.10);
-      border:1px solid rgba(245,158,11,.25);
-      color:#fde68a;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="topbar">
       <div>
-        <div class="title">Panel nauczyciela</div>
-        <div class="small">Wpisz zdania i wygeneruj link dla studentów działający na innych urządzeniach.</div>
+        <div class="title">Panel nauczyciela v2</div>
+        <div class="small">Wersja gotowa do szkoły: import/export JSON, ustawienia gry i prosty workflow dla GitHub Pages.</div>
       </div>
-      <a href="index.html">Otwórz grę</a>
+      <a href="index.html">Otwórz grę studenta</a>
     </div>
 
     <div class="grid">
       <div class="card">
-        <h2>Zdania po angielsku</h2>
+        <h2>1. Zdania</h2>
         <label for="sentencesInput">Jedno zdanie w jednej linii</label>
         <textarea id="sentencesInput" placeholder="Np.
 I like learning English
 She goes to school every day
 We are reading a good book"></textarea>
 
-        <div class="small" style="margin-top:10px;">
-          Ten generator tworzy link zawierający zdania w adresie strony.  
-          Dzięki temu student może otworzyć link na innym komputerze lub telefonie.
+        <div class="row">
+          <div>
+            <label for="gameTitle">Tytuł gry</label>
+            <input id="gameTitle" type="text" placeholder="Np. English Sentences - Class 5A" />
+          </div>
+          <div>
+            <label for="difficulty">Poziom trudności</label>
+            <select id="difficulty">
+              <option value="easy">Łatwy</option>
+              <option value="medium" selected>Średni</option>
+              <option value="hard">Trudny</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="spawnRate">Czas pojawiania się liter</label>
+            <select id="spawnRate">
+              <option value="1200">Wolno</option>
+              <option value="900" selected>Normalnie</option>
+              <option value="650">Szybko</option>
+            </select>
+          </div>
+          <div>
+            <label for="timerSeconds">Timer na zdanie</label>
+            <select id="timerSeconds">
+              <option value="0">Bez timera</option>
+              <option value="30">30 sekund</option>
+              <option value="45" selected>45 sekund</option>
+              <option value="60">60 sekund</option>
+              <option value="90">90 sekund</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="maxMistakes">Maksymalna liczba błędów</label>
+            <select id="maxMistakes">
+              <option value="0">Bez limitu</option>
+              <option value="3">3</option>
+              <option value="5" selected>5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+          <div>
+            <label for="randomOrder">Kolejność zdań</label>
+            <select id="randomOrder">
+              <option value="false" selected>Po kolei</option>
+              <option value="true">Losowo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="allowHint">Podpowiedź</label>
+            <select id="allowHint">
+              <option value="true" selected>Włączona</option>
+              <option value="false">Wyłączona</option>
+            </select>
+          </div>
+          <div>
+            <label for="allowSolution">Pokaż rozwiązanie</label>
+            <select id="allowSolution">
+              <option value="true">Włączone</option>
+              <option value="false" selected>Wyłączone</option>
+            </select>
+          </div>
         </div>
 
         <div class="actions">
-          <button class="primary" id="generateBtn">Generuj link</button>
-          <button class="success" id="copyBtn">Kopiuj link</button>
-          <button class="secondary" id="openBtn">Otwórz link</button>
+          <button class="primary" id="previewBtn">Podgląd danych</button>
+          <button class="success" id="downloadBtn">Pobierz sentences.json</button>
+          <button class="secondary" id="copyBtn">Kopiuj JSON</button>
+          <button class="secondary" id="importBtn">Wczytaj istniejący JSON</button>
+          <input type="file" id="importFile" accept=".json,application/json" style="display:none" />
           <button class="warning" id="demoBtn">Wstaw przykładowe</button>
           <button class="danger" id="clearBtn">Wyczyść</button>
         </div>
 
-        <div class="link-box">
-          <label for="generatedLink">Wygenerowany link dla studenta</label>
-          <input id="generatedLink" type="text" readonly placeholder="Tutaj pojawi się link..." />
-        </div>
-
-        <div class="message info" id="message">Wpisz zdania i kliknij „Generuj link”.</div>
-
-        <div class="warning-box">
-          Jeśli zdań będzie bardzo dużo albo będą bardzo długie, link może stać się zbyt długi.  
-          Dla typowych ćwiczeń szkolnych działa to bardzo dobrze.
-        </div>
+        <div class="message info" id="message">Wpisz zdania, ustaw parametry i pobierz plik JSON.</div>
       </div>
 
       <div class="card">
-        <h2>Podgląd zdań</h2>
-        <div class="small" id="stats">Liczba zdań: 0</div>
+        <h2>2. Podgląd</h2>
+        <div id="stats" class="small">Liczba zdań: 0</div>
+        <div style="margin-top:10px;">
+          <span class="pill">Import JSON</span>
+          <span class="pill">Export JSON</span>
+          <span class="pill">Timer</span>
+          <span class="pill">Błędy</span>
+          <span class="pill">Losowanie</span>
+          <span class="pill">Podpowiedź</span>
+        </div>
         <div id="previewList" class="preview-list"></div>
       </div>
     </div>
 
     <div class="card" style="margin-top:16px;">
-      <h2>Jak to działa</h2>
-      <ol class="small">
-        <li>Wpisujesz zdania w panelu nauczyciela.</li>
-        <li>Klikasz <strong>Generuj link</strong>.</li>
-        <li>Wysyłasz link studentom.</li>
-        <li>Student otwiera link i gra dokładnie z tymi zdaniami.</li>
-      </ol>
+      <h2>3. Podgląd pliku sentences.json</h2>
+      <textarea id="jsonOutput" class="json-output" readonly></textarea>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h2>Jak używać w szkole</h2>
       <div class="small">
-        Na GitHub Pages wystarczą 2 pliki: <code>teacher.html</code> i <code>index.html</code>.
+        1. Edytujesz zdania w <code>teacher.html</code><br>
+        2. Ustawiasz parametry gry<br>
+        3. Pobierasz <code>sentences.json</code><br>
+        4. Wrzucasz ten plik do repozytorium GitHub obok <code>index.html</code><br>
+        5. Uczniowie otwierają stronę gry
       </div>
     </div>
   </div>
 
   <script>
     const sentencesInput = document.getElementById("sentencesInput");
-    const generateBtn = document.getElementById("generateBtn");
+    const gameTitle = document.getElementById("gameTitle");
+    const difficulty = document.getElementById("difficulty");
+    const spawnRate = document.getElementById("spawnRate");
+    const timerSeconds = document.getElementById("timerSeconds");
+    const maxMistakes = document.getElementById("maxMistakes");
+    const randomOrder = document.getElementById("randomOrder");
+    const allowHint = document.getElementById("allowHint");
+    const allowSolution = document.getElementById("allowSolution");
+
+    const previewBtn = document.getElementById("previewBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
     const copyBtn = document.getElementById("copyBtn");
-    const openBtn = document.getElementById("openBtn");
+    const importBtn = document.getElementById("importBtn");
+    const importFile = document.getElementById("importFile");
     const demoBtn = document.getElementById("demoBtn");
     const clearBtn = document.getElementById("clearBtn");
-    const generatedLink = document.getElementById("generatedLink");
+
+    const jsonOutput = document.getElementById("jsonOutput");
     const message = document.getElementById("message");
     const previewList = document.getElementById("previewList");
     const stats = document.getElementById("stats");
@@ -263,7 +353,8 @@ We are reading a good book"></textarea>
       "She goes to school every day",
       "We are reading a good book",
       "They play football after class",
-      "My friend is very helpful"
+      "My friend is very helpful",
+      "This lesson is easy and fun"
     ];
 
     function setMessage(text, type = "info"){
@@ -272,9 +363,7 @@ We are reading a good book"></textarea>
     }
 
     function cleanSentences(lines){
-      return lines
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
+      return lines.map(line => line.trim()).filter(line => line.length > 0);
     }
 
     function escapeHtml(text){
@@ -300,82 +389,174 @@ We are reading a good book"></textarea>
       });
     }
 
-    function encodeSentences(sentences){
-      const json = JSON.stringify(sentences);
-      return encodeURIComponent(json);
-    }
-
-    function buildStudentLink(sentences){
-      const encoded = encodeSentences(sentences);
-      const baseUrl = new URL("index.html", window.location.href);
-      baseUrl.searchParams.set("sentences", encoded);
-      return baseUrl.toString();
-    }
-
-    function generateLink(){
-      const lines = sentencesInput.value.split("\n");
-      const sentences = cleanSentences(lines);
-
-      renderPreview(sentences);
+    function buildData(){
+      const sentences = cleanSentences(sentencesInput.value.split("\n"));
 
       if(sentences.length === 0){
-        generatedLink.value = "";
         setMessage("Wpisz przynajmniej jedno zdanie.", "err");
-        return;
+        jsonOutput.value = "";
+        renderPreview([]);
+        return null;
       }
 
-      const link = buildStudentLink(sentences);
-      generatedLink.value = link;
-      setMessage("Link został wygenerowany.", "ok");
+      const data = {
+        title: gameTitle.value.trim() || "English Sentence Builder",
+        settings: {
+          difficulty: difficulty.value,
+          spawnRate: Number(spawnRate.value),
+          timerSeconds: Number(timerSeconds.value),
+          maxMistakes: Number(maxMistakes.value),
+          randomOrder: randomOrder.value === "true",
+          allowHint: allowHint.value === "true",
+          allowSolution: allowSolution.value === "true"
+        },
+        sentences
+      };
+
+      renderPreview(sentences);
+      jsonOutput.value = JSON.stringify(data, null, 2);
+      setMessage("Dane JSON zostały przygotowane.", "ok");
+      return data;
     }
 
-    async function copyLink(){
-      const link = generatedLink.value.trim();
-      if(!link){
-        setMessage("Najpierw wygeneruj link.", "err");
+    function fillFormFromData(data){
+      const safeTitle = typeof data.title === "string" ? data.title : "English Sentence Builder";
+      const safeSettings = data.settings || {};
+      const safeSentences = Array.isArray(data.sentences) ? data.sentences : [];
+
+      gameTitle.value = safeTitle;
+      difficulty.value = safeSettings.difficulty || "medium";
+      spawnRate.value = String(safeSettings.spawnRate || 900);
+      timerSeconds.value = String(
+        safeSettings.timerSeconds !== undefined ? safeSettings.timerSeconds : 45
+      );
+      maxMistakes.value = String(
+        safeSettings.maxMistakes !== undefined ? safeSettings.maxMistakes : 5
+      );
+      randomOrder.value = String(!!safeSettings.randomOrder);
+      allowHint.value = String(
+        safeSettings.allowHint !== undefined ? safeSettings.allowHint : true
+      );
+      allowSolution.value = String(
+        safeSettings.allowSolution !== undefined ? safeSettings.allowSolution : false
+      );
+
+      sentencesInput.value = safeSentences.join("\n");
+      renderPreview(safeSentences);
+      jsonOutput.value = JSON.stringify({
+        title: safeTitle,
+        settings: {
+          difficulty: difficulty.value,
+          spawnRate: Number(spawnRate.value),
+          timerSeconds: Number(timerSeconds.value),
+          maxMistakes: Number(maxMistakes.value),
+          randomOrder: randomOrder.value === "true",
+          allowHint: allowHint.value === "true",
+          allowSolution: allowSolution.value === "true"
+        },
+        sentences: safeSentences
+      }, null, 2);
+    }
+
+    function downloadJsonFile(filename, content){
+      const blob = new Blob([content], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function copyJson(){
+      const value = jsonOutput.value.trim();
+      if(!value){
+        setMessage("Najpierw przygotuj JSON.", "err");
         return;
       }
 
       try{
-        await navigator.clipboard.writeText(link);
-        setMessage("Link skopiowany do schowka.", "ok");
+        await navigator.clipboard.writeText(value);
+        setMessage("JSON skopiowany do schowka.", "ok");
       }catch{
-        generatedLink.select();
+        jsonOutput.select();
         document.execCommand("copy");
-        setMessage("Link skopiowany do schowka.", "ok");
+        setMessage("JSON skopiowany do schowka.", "ok");
       }
     }
 
-    function openLink(){
-      const link = generatedLink.value.trim();
-      if(!link){
-        setMessage("Najpierw wygeneruj link.", "err");
-        return;
-      }
-      window.open(link, "_blank");
-    }
+    previewBtn.addEventListener("click", buildData);
 
-    generateBtn.addEventListener("click", generateLink);
-    copyBtn.addEventListener("click", copyLink);
-    openBtn.addEventListener("click", openLink);
+    downloadBtn.addEventListener("click", () => {
+      const data = buildData();
+      if(!data) return;
+      downloadJsonFile("sentences.json", JSON.stringify(data, null, 2));
+      setMessage("Pobrano plik sentences.json.", "ok");
+    });
+
+    copyBtn.addEventListener("click", copyJson);
+
+    importBtn.addEventListener("click", () => importFile.click());
+
+    importFile.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if(!file) return;
+
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+
+        if(!data || !Array.isArray(data.sentences)){
+          throw new Error("Niepoprawny format JSON.");
+        }
+
+        fillFormFromData(data);
+        setMessage("Wczytano plik JSON.", "ok");
+      }catch(error){
+        console.error(error);
+        setMessage("Nie udało się wczytać pliku JSON.", "err");
+      }finally{
+        importFile.value = "";
+      }
+    });
 
     demoBtn.addEventListener("click", () => {
-      sentencesInput.value = demoSentences.join("\n");
-      renderPreview(demoSentences);
-      generatedLink.value = "";
-      setMessage("Wstawiono przykładowe zdania.", "info");
+      const data = {
+        title: "English Sentences - Demo",
+        settings: {
+          difficulty: "medium",
+          spawnRate: 900,
+          timerSeconds: 45,
+          maxMistakes: 5,
+          randomOrder: false,
+          allowHint: true,
+          allowSolution: false
+        },
+        sentences: demoSentences
+      };
+      fillFormFromData(data);
+      setMessage("Wstawiono przykładowe dane.", "info");
     });
 
     clearBtn.addEventListener("click", () => {
+      gameTitle.value = "";
+      difficulty.value = "medium";
+      spawnRate.value = "900";
+      timerSeconds.value = "45";
+      maxMistakes.value = "5";
+      randomOrder.value = "false";
+      allowHint.value = "true";
+      allowSolution.value = "false";
       sentencesInput.value = "";
-      generatedLink.value = "";
+      jsonOutput.value = "";
       renderPreview([]);
-      setMessage("Wyczyszczono pola.", "info");
+      setMessage("Wyczyszczono formularz.", "info");
     });
 
     (function init(){
-      sentencesInput.value = demoSentences.join("\n");
-      renderPreview(demoSentences);
+      demoBtn.click();
     })();
   </script>
 </body>
