@@ -1,261 +1,261 @@
+<!-- =========================
+FILE: teacher.html
+========================= -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spadające litery - układanie zdań</title>
+  <title>Panel nauczyciela</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --accent: #22c55e;
-      --accent-2: #38bdf8;
-      --danger: #ef4444;
-      --text: #e5e7eb;
-      --muted: #94a3b8;
-      --letter: #f8fafc;
+    :root{
+      --bg:#0f172a;
+      --panel:#111827;
+      --panel2:#1f2937;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --accent:#38bdf8;
+      --success:#22c55e;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --border:rgba(148,163,184,.18);
     }
 
-    * {
-      box-sizing: border-box;
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:linear-gradient(180deg,#0f172a 0%,#111827 100%);
+      color:var(--text);
+      min-height:100vh;
     }
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
-      color: var(--text);
-      min-height: 100vh;
+    .container{
+      max-width:1150px;
+      margin:0 auto;
+      padding:20px;
     }
 
-    .app {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
     }
 
-    .topbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
+    .title{
+      font-size:30px;
+      font-weight:bold;
     }
 
-    .title {
-      font-size: 28px;
-      font-weight: bold;
+    .topbar a{
+      text-decoration:none;
+      color:white;
+      background:var(--accent);
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:bold;
     }
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
     }
 
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 10px 14px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      background: var(--accent-2);
-      color: #0b1020;
-    }
-
-    button:hover {
-      opacity: 0.92;
-    }
-
-    .secondary {
-      background: #334155;
-      color: white;
-    }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .card {
-      background: rgba(17, 24, 39, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      border-radius: 14px;
-      padding: 14px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-    }
-
-    .card h2 {
-      margin: 0 0 10px 0;
-      font-size: 18px;
-    }
-
-    .sentence-display {
-      font-size: 20px;
-      line-height: 1.6;
-      letter-spacing: 1px;
-      word-break: break-word;
-    }
-
-    .target-text {
-      color: var(--muted);
-      margin-top: 8px;
-      font-size: 14px;
-    }
-
-    .game-area {
-      position: relative;
-      height: 60vh;
-      min-height: 420px;
-      overflow: hidden;
-      border-radius: 16px;
-      border: 2px solid rgba(56, 189, 248, 0.3);
-      background:
-        radial-gradient(circle at top, rgba(56,189,248,0.10), transparent 35%),
-        linear-gradient(180deg, rgba(15,23,42,0.85), rgba(2,6,23,1));
-    }
-
-    .letter {
-      position: absolute;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--letter);
-      color: #0f172a;
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-      transition: transform 0.08s ease;
-    }
-
-    .letter:hover {
-      transform: scale(1.08);
-    }
-
-    .bottom-panel {
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .message {
-      min-height: 28px;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .message.success {
-      color: var(--accent);
-    }
-
-    .message.error {
-      color: var(--danger);
-    }
-
-    .message.info {
-      color: var(--accent-2);
-    }
-
-    .progress {
-      font-size: 18px;
-      line-height: 1.8;
-      word-break: break-word;
-      background: rgba(255,255,255,0.03);
-      padding: 12px;
-      border-radius: 10px;
-    }
-
-    .correct-char {
-      color: var(--accent);
-      font-weight: bold;
-    }
-
-    .missing-char {
-      color: #64748b;
-      border-bottom: 2px dashed #475569;
-      padding: 0 2px;
-      margin: 0 1px;
-    }
-
-    .space-char {
-      display: inline-block;
-      width: 12px;
-    }
-
-    .footer-note {
-      margin-top: 10px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    @media (min-width: 900px) {
-      .info-grid {
-        grid-template-columns: 1fr 1fr;
+    @media (min-width:980px){
+      .grid{
+        grid-template-columns:1.1fr .9fr;
       }
+    }
 
-      .bottom-panel {
-        grid-template-columns: 1fr 1fr;
-      }
+    .card{
+      background:rgba(17,24,39,.92);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+      box-shadow:0 8px 20px rgba(0,0,0,.24);
+    }
+
+    h1,h2,h3{
+      margin-top:0;
+    }
+
+    label{
+      display:block;
+      margin-bottom:8px;
+      font-weight:bold;
+    }
+
+    textarea, input{
+      width:100%;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0b1220;
+      color:var(--text);
+      padding:12px;
+      font-size:15px;
+    }
+
+    textarea{
+      min-height:260px;
+      resize:vertical;
+      line-height:1.5;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    button{
+      border:none;
+      border-radius:10px;
+      padding:10px 14px;
+      font-size:14px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .primary{background:var(--accent); color:#08111f;}
+    .success{background:var(--success); color:#04130a;}
+    .danger{background:var(--danger); color:white;}
+    .secondary{background:#334155; color:white;}
+    .warning{background:var(--warning); color:#111827;}
+
+    .message{
+      margin-top:14px;
+      min-height:24px;
+      font-weight:bold;
+    }
+
+    .ok{color:var(--success)}
+    .err{color:var(--danger)}
+    .info{color:var(--accent)}
+
+    .small{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .sentence-item{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:10px;
+      padding:10px 12px;
+      margin-bottom:10px;
+    }
+
+    .preview-list{
+      margin-top:12px;
+    }
+
+    .download-box{
+      margin-top:14px;
+    }
+
+    code{
+      background:#0b1220;
+      padding:2px 6px;
+      border-radius:6px;
+    }
+
+    .note{
+      margin-top:12px;
+      padding:12px;
+      border-radius:12px;
+      background:rgba(56,189,248,.08);
+      border:1px solid rgba(56,189,248,.2);
     }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="container">
     <div class="topbar">
-      <div class="title">Gra: Spadające litery</div>
-      <div class="controls">
-        <button id="nextSentenceBtn">Następne zdanie</button>
-        <button id="restartBtn" class="secondary">Restart zdania</button>
+      <div>
+        <div class="title">Panel nauczyciela</div>
+        <div class="small">Tworzenie pliku <code>sentences.json</code> do profesjonalnej wersji gry.</div>
       </div>
+      <a href="index.html">Otwórz grę studenta</a>
     </div>
 
-    <div class="info-grid">
+    <div class="grid">
       <div class="card">
-        <h2>Instrukcja</h2>
-        <div>
-          Klikaj tylko w litery, które należą do zdania.  
-          Jeśli klikniesz poprawną literę, zostanie dodana do zdania na dole.  
-          Jeśli klikniesz złą literę, pojawi się komunikat o błędzie.
+        <h2>Zdania po angielsku</h2>
+        <label for="sentencesInput">Jedno zdanie w jednej linii</label>
+        <textarea id="sentencesInput" placeholder="Np.
+I like learning English
+She goes to school every day
+We are reading a good book"></textarea>
+
+        <div class="small" style="margin-top:10px;">
+          Ta wersja eksportuje gotowy plik <code>sentences.json</code>.  
+          Potem wrzucasz ten plik razem z <code>index.html</code> na GitHub Pages.
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="previewBtn">Podgląd</button>
+          <button class="success" id="downloadBtn">Pobierz sentences.json</button>
+          <button class="secondary" id="copyBtn">Kopiuj JSON</button>
+          <button class="warning" id="demoBtn">Wstaw przykładowe</button>
+          <button class="danger" id="clearBtn">Wyczyść</button>
+        </div>
+
+        <div class="download-box">
+          <label for="jsonOutput">Podgląd pliku JSON</label>
+          <textarea id="jsonOutput" readonly></textarea>
+        </div>
+
+        <div class="message info" id="message">Wpisz zdania i wygeneruj plik JSON.</div>
+
+        <div class="note small">
+          <strong>Jak publikować:</strong><br>
+          1. Edytujesz zdania tutaj<br>
+          2. Pobierasz <code>sentences.json</code><br>
+          3. Wrzucasz plik do repozytorium GitHub obok <code>index.html</code><br>
+          4. Studenci otwierają zwykły link do gry
         </div>
       </div>
 
       <div class="card">
-        <h2>Zdanie do ułożenia</h2>
-        <div class="sentence-display" id="hiddenSentence"></div>
-        <div class="target-text">Student nie widzi rozwiązania, widzi tylko miejsca na litery.</div>
+        <h2>Podgląd zdań</h2>
+        <div class="small" id="stats">Liczba zdań: 0</div>
+        <div id="previewList" class="preview-list"></div>
       </div>
     </div>
 
-    <div class="game-area" id="gameArea"></div>
-
-    <div class="bottom-panel">
-      <div class="card">
-        <h2>Budowane zdanie</h2>
-        <div class="progress" id="progressDisplay"></div>
-        <div class="footer-note">Spacje są uzupełniane automatycznie.</div>
-      </div>
-
-      <div class="card">
-        <h2>Komunikat</h2>
-        <div class="message info" id="message">Kliknij poprawną literę.</div>
-        <div class="footer-note" id="statusLine">Postęp: 0%</div>
+    <div class="card" style="margin-top:16px;">
+      <h2>Struktura projektu</h2>
+      <div class="small">
+        W repozytorium powinny być 3 pliki:
+        <ul>
+          <li><code>index.html</code> — gra dla studentów</li>
+          <li><code>teacher.html</code> — panel nauczyciela</li>
+          <li><code>sentences.json</code> — baza zdań</li>
+        </ul>
       </div>
     </div>
   </div>
 
   <script>
-    const sentences = [
+    const sentencesInput = document.getElementById("sentencesInput");
+    const previewBtn = document.getElementById("previewBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const demoBtn = document.getElementById("demoBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const jsonOutput = document.getElementById("jsonOutput");
+    const message = document.getElementById("message");
+    const previewList = document.getElementById("previewList");
+    const stats = document.getElementById("stats");
+
+    const demoSentences = [
       "I like learning English",
       "She goes to school every day",
       "We are reading a good book",
@@ -264,14 +264,440 @@
       "This lesson is easy and fun"
     ];
 
+    function setMessage(text, type = "info"){
+      message.textContent = text;
+      message.className = "message " + type;
+    }
+
+    function cleanSentences(lines){
+      return lines
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    }
+
+    function buildJson(sentences){
+      return JSON.stringify({ sentences }, null, 2);
+    }
+
+    function escapeHtml(text){
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderPreview(sentences){
+      previewList.innerHTML = "";
+      stats.textContent = "Liczba zdań: " + sentences.length;
+
+      if(sentences.length === 0){
+        previewList.innerHTML = '<div class="small">Brak zdań do podglądu.</div>';
+        return;
+      }
+
+      sentences.forEach((sentence, index) => {
+        const item = document.createElement("div");
+        item.className = "sentence-item";
+        item.innerHTML = `<strong>${index + 1}.</strong> ${escapeHtml(sentence)}`;
+        previewList.appendChild(item);
+      });
+    }
+
+    function generateData(){
+      const lines = sentencesInput.value.split("\n");
+      const sentences = cleanSentences(lines);
+
+      renderPreview(sentences);
+
+      if(sentences.length === 0){
+        jsonOutput.value = "";
+        setMessage("Wpisz przynajmniej jedno zdanie.", "err");
+        return null;
+      }
+
+      const json = buildJson(sentences);
+      jsonOutput.value = json;
+      setMessage("JSON został przygotowany.", "ok");
+      return { sentences, json };
+    }
+
+    function downloadJsonFile(filename, content){
+      const blob = new Blob([content], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function copyJson(){
+      const value = jsonOutput.value.trim();
+      if(!value){
+        setMessage("Najpierw przygotuj JSON.", "err");
+        return;
+      }
+
+      try{
+        await navigator.clipboard.writeText(value);
+        setMessage("JSON skopiowany do schowka.", "ok");
+      }catch{
+        jsonOutput.select();
+        document.execCommand("copy");
+        setMessage("JSON skopiowany do schowka.", "ok");
+      }
+    }
+
+    previewBtn.addEventListener("click", generateData);
+
+    downloadBtn.addEventListener("click", () => {
+      const data = generateData();
+      if(!data) return;
+      downloadJsonFile("sentences.json", data.json);
+      setMessage("Plik sentences.json został pobrany.", "ok");
+    });
+
+    copyBtn.addEventListener("click", copyJson);
+
+    demoBtn.addEventListener("click", () => {
+      sentencesInput.value = demoSentences.join("\n");
+      renderPreview(demoSentences);
+      jsonOutput.value = buildJson(demoSentences);
+      setMessage("Wstawiono przykładowe zdania.", "info");
+    });
+
+    clearBtn.addEventListener("click", () => {
+      sentencesInput.value = "";
+      jsonOutput.value = "";
+      renderPreview([]);
+      setMessage("Wyczyszczono pola.", "info");
+    });
+
+    (function init(){
+      sentencesInput.value = demoSentences.join("\n");
+      renderPreview(demoSentences);
+      jsonOutput.value = buildJson(demoSentences);
+    })();
+  </script>
+</body>
+</html>
+
+<!-- =========================
+FILE: index.html
+========================= -->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gra dla studentów</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:#111827;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --accent:#38bdf8;
+      --success:#22c55e;
+      --danger:#ef4444;
+      --letter:#f8fafc;
+      --border:rgba(148,163,184,.18);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,#0f172a 0%,#111827 100%);
+      min-height:100vh;
+    }
+
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      padding:16px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .title{
+      font-size:28px;
+      font-weight:bold;
+    }
+
+    .topbar a{
+      color:white;
+      text-decoration:none;
+      background:#334155;
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:bold;
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    @media (min-width:900px){
+      .cards{
+        grid-template-columns:1fr 1fr 1fr;
+      }
+    }
+
+    .card{
+      background:rgba(17,24,39,.92);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      box-shadow:0 8px 20px rgba(0,0,0,.22);
+    }
+
+    .card h2{
+      margin-top:0;
+      font-size:18px;
+    }
+
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    button{
+      border:none;
+      border-radius:10px;
+      padding:10px 14px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:bold;
+    }
+
+    .primary{background:var(--accent); color:#08111f;}
+    .secondary{background:#334155; color:white;}
+    .success{background:var(--success); color:#04130a;}
+
+    .game-area{
+      position:relative;
+      height:60vh;
+      min-height:430px;
+      overflow:hidden;
+      border-radius:16px;
+      border:2px solid rgba(56,189,248,.25);
+      background:
+        radial-gradient(circle at top, rgba(56,189,248,.10), transparent 36%),
+        linear-gradient(180deg, rgba(15,23,42,.88), rgba(2,6,23,1));
+    }
+
+    .letter{
+      position:absolute;
+      width:50px;
+      height:50px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--letter);
+      color:#0f172a;
+      font-size:24px;
+      font-weight:bold;
+      cursor:pointer;
+      user-select:none;
+      box-shadow:0 10px 20px rgba(0,0,0,.28);
+      transition:transform .08s ease;
+    }
+
+    .letter:hover{
+      transform:scale(1.08);
+    }
+
+    .bottom{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:16px;
+    }
+
+    @media (min-width:900px){
+      .bottom{
+        grid-template-columns:1.4fr .8fr;
+      }
+    }
+
+    .progress{
+      font-size:22px;
+      line-height:1.9;
+      word-break:break-word;
+      background:rgba(255,255,255,.03);
+      padding:12px;
+      border-radius:12px;
+      min-height:74px;
+    }
+
+    .correct-char{
+      color:var(--success);
+      font-weight:bold;
+    }
+
+    .missing-char{
+      color:#64748b;
+      border-bottom:2px dashed #475569;
+      padding:0 2px;
+      margin:0 1px;
+    }
+
+    .space-char{
+      display:inline-block;
+      width:12px;
+    }
+
+    .message{
+      min-height:28px;
+      font-size:16px;
+      font-weight:bold;
+    }
+
+    .ok{color:var(--success)}
+    .err{color:var(--danger)}
+    .info{color:var(--accent)}
+
+    .small{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .score{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .score-box{
+      background:rgba(255,255,255,.03);
+      border-radius:10px;
+      padding:10px;
+      text-align:center;
+    }
+
+    .score-box strong{
+      display:block;
+      font-size:22px;
+      margin-top:4px;
+    }
+
+    .sentence-number{
+      font-size:15px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <div class="title">Gra dla studentów</div>
+        <div class="sentence-number" id="sentenceNumber">Zdanie 1</div>
+      </div>
+      <a href="teacher.html">Panel nauczyciela</a>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h2>Instrukcja</h2>
+        <div class="small">
+          Klikaj litery, które pasują do zdania.  
+          Litery trzeba wybierać po kolei.  
+          Jeśli klikniesz złą literę, pojawi się komunikat.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Sterowanie</h2>
+        <div class="controls">
+          <button class="primary" id="restartBtn">Restart zdania</button>
+          <button class="secondary" id="nextBtn">Następne zdanie</button>
+          <button class="success" id="toggleBtn">Pauza</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Status</h2>
+        <div class="message info" id="message">Ładowanie zdań...</div>
+        <div class="small" id="statusLine">Postęp: 0%</div>
+      </div>
+    </div>
+
+    <div class="game-area" id="gameArea"></div>
+
+    <div class="bottom">
+      <div class="card">
+        <h2>Budowane zdanie</h2>
+        <div class="progress" id="progressDisplay"></div>
+        <div class="small">Spacje są dodawane automatycznie.</div>
+      </div>
+
+      <div class="card">
+        <h2>Punkty</h2>
+        <div class="score">
+          <div class="score-box">
+            Poprawne
+            <strong id="correctCount">0</strong>
+          </div>
+          <div class="score-box">
+            Błędy
+            <strong id="wrongCount">0</strong>
+          </div>
+          <div class="score-box">
+            Ukończone
+            <strong id="finishedCount">0</strong>
+          </div>
+          <div class="score-box">
+            Razem zdań
+            <strong id="totalCount">0</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fallbackSentences = [
+      "I like learning English",
+      "She goes to school every day",
+      "We are reading a good book"
+    ];
+
     const gameArea = document.getElementById("gameArea");
     const progressDisplay = document.getElementById("progressDisplay");
     const message = document.getElementById("message");
-    const hiddenSentence = document.getElementById("hiddenSentence");
     const statusLine = document.getElementById("statusLine");
-    const nextSentenceBtn = document.getElementById("nextSentenceBtn");
-    const restartBtn = document.getElementById("restartBtn");
+    const sentenceNumber = document.getElementById("sentenceNumber");
 
+    const restartBtn = document.getElementById("restartBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const toggleBtn = document.getElementById("toggleBtn");
+
+    const correctCountEl = document.getElementById("correctCount");
+    const wrongCountEl = document.getElementById("wrongCount");
+    const finishedCountEl = document.getElementById("finishedCount");
+    const totalCountEl = document.getElementById("totalCount");
+
+    let sentences = [];
     let currentSentenceIndex = 0;
     let currentSentence = "";
     let currentPosition = 0;
@@ -279,104 +705,129 @@
     let animationId = null;
     let spawnInterval = null;
     let gameFinished = false;
+    let paused = false;
     let letterIdCounter = 0;
 
-    function normalizeChar(char) {
-      return char.toLowerCase();
+    let correctCount = 0;
+    let wrongCount = 0;
+    let finishedCount = 0;
+
+    async function loadSentencesFromJson(){
+      try{
+        const response = await fetch("sentences.json", { cache: "no-store" });
+
+        if(!response.ok){
+          throw new Error("Nie udało się pobrać sentences.json");
+        }
+
+        const data = await response.json();
+
+        if(!data || !Array.isArray(data.sentences)){
+          throw new Error("Niepoprawny format sentences.json");
+        }
+
+        const cleaned = data.sentences
+          .map(item => String(item).trim())
+          .filter(item => item.length > 0);
+
+        if(cleaned.length === 0){
+          throw new Error("Plik sentences.json nie zawiera zdań");
+        }
+
+        return cleaned;
+      }catch(error){
+        console.error(error);
+        return fallbackSentences;
+      }
     }
 
-    function setMessage(text, type = "info") {
+    function setMessage(text, type = "info"){
       message.textContent = text;
       message.className = "message " + type;
     }
 
-    function getMaskedSentence(sentence) {
-      return sentence
-        .split("")
-        .map(ch => {
-          if (ch === " ") return " ";
-          return "_";
-        })
-        .join(" ");
+    function normalizeChar(char){
+      return char.toLowerCase();
     }
 
-    function renderHiddenSentence() {
-      hiddenSentence.textContent = getMaskedSentence(currentSentence);
+    function escapeHtml(text){
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
     }
 
-    function renderProgress() {
+    function updateScore(){
+      correctCountEl.textContent = correctCount;
+      wrongCountEl.textContent = wrongCount;
+      finishedCountEl.textContent = finishedCount;
+      totalCountEl.textContent = sentences.length;
+    }
+
+    function skipSpaces(){
+      while(currentPosition < currentSentence.length && currentSentence[currentPosition] === " "){
+        currentPosition++;
+      }
+    }
+
+    function renderProgress(){
       let html = "";
 
-      for (let i = 0; i < currentSentence.length; i++) {
+      for(let i = 0; i < currentSentence.length; i++){
         const ch = currentSentence[i];
 
-        if (ch === " ") {
+        if(ch === " "){
           html += '<span class="space-char"></span>';
-        } else if (i < currentPosition) {
+        }else if(i < currentPosition){
           html += `<span class="correct-char">${escapeHtml(ch)}</span>`;
-        } else {
+        }else{
           html += `<span class="missing-char">_</span>`;
         }
       }
 
       progressDisplay.innerHTML = html;
 
-      const visibleChars = currentSentence.replace(/\s/g, "").length;
-      const doneChars = currentSentence.slice(0, currentPosition).replace(/\s/g, "").length;
-      const percent = visibleChars === 0 ? 100 : Math.round((doneChars / visibleChars) * 100);
-      statusLine.textContent = `Postęp: ${percent}%`;
+      const allLetters = currentSentence.replace(/\s/g, "").length;
+      const doneLetters = currentSentence.slice(0, currentPosition).replace(/\s/g, "").length;
+      const percent = allLetters === 0 ? 100 : Math.round((doneLetters / allLetters) * 100);
+
+      statusLine.textContent = "Postęp: " + percent + "%";
+      sentenceNumber.textContent = "Zdanie " + (currentSentenceIndex + 1) + " z " + sentences.length;
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement("div");
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function skipSpaces() {
-      while (currentPosition < currentSentence.length && currentSentence[currentPosition] === " ") {
-        currentPosition++;
-      }
-    }
-
-    function createLetterElement(letterObj) {
+    function createLetterElement(letterObj){
       const el = document.createElement("div");
       el.className = "letter";
       el.textContent = letterObj.char.toUpperCase();
       el.style.left = letterObj.x + "px";
       el.style.top = letterObj.y + "px";
       el.dataset.id = letterObj.id;
-
       el.addEventListener("click", () => handleLetterClick(letterObj.id));
       gameArea.appendChild(el);
       letterObj.element = el;
     }
 
-    function spawnLetter() {
-      if (gameFinished) return;
+    function spawnLetter(){
+      if(gameFinished || paused) return;
+
+      skipSpaces();
 
       const charsPool = "abcdefghijklmnopqrstuvwxyz";
-      let nextExpected = currentSentence[currentPosition];
+      const expected = currentSentence[currentPosition];
+      const useCorrect = Math.random() < 0.45 && expected && expected !== " ";
 
-      if (!nextExpected || nextExpected === " ") {
-        skipSpaces();
-        nextExpected = currentSentence[currentPosition];
-      }
-
-      let useCorrectLetter = Math.random() < 0.45 && nextExpected && nextExpected !== " ";
-      let char = useCorrectLetter
-        ? normalizeChar(nextExpected)
+      const char = useCorrect
+        ? normalizeChar(expected)
         : charsPool[Math.floor(Math.random() * charsPool.length)];
 
       const width = gameArea.clientWidth;
       const x = Math.max(0, Math.floor(Math.random() * (width - 56)));
-      const speed = 0.8 + Math.random() * 1.6;
+      const speed = 0.8 + Math.random() * 1.7;
 
       const letterObj = {
         id: ++letterIdCounter,
         char,
         x,
-        y: -50,
+        y: -55,
         speed,
         element: null
       };
@@ -385,136 +836,173 @@
       createLetterElement(letterObj);
     }
 
-    function handleLetterClick(id) {
-      if (gameFinished) return;
-
+    function removeLetter(id){
       const index = letters.findIndex(l => l.id === id);
-      if (index === -1) return;
-
-      skipSpaces();
-
-      const clickedLetter = letters[index];
-      const expectedChar = currentSentence[currentPosition];
-
-      if (expectedChar && normalizeChar(clickedLetter.char) === normalizeChar(expectedChar)) {
-        removeLetter(clickedLetter.id);
-        currentPosition++;
-        skipSpaces();
-        renderProgress();
-
-        if (currentPosition >= currentSentence.length) {
-          finishGame();
-        } else {
-          setMessage("Dobrze! To poprawna litera.", "success");
-        }
-      } else {
-        removeLetter(clickedLetter.id);
-        setMessage(
-          `Błąd! Ta litera nie pasuje w tym miejscu zdania.`,
-          "error"
-        );
-      }
-    }
-
-    function removeLetter(id) {
-      const index = letters.findIndex(l => l.id === id);
-      if (index === -1) return;
+      if(index === -1) return;
 
       const [letter] = letters.splice(index, 1);
-      if (letter.element && letter.element.parentNode) {
+      if(letter.element && letter.element.parentNode){
         letter.element.parentNode.removeChild(letter.element);
       }
     }
 
-    function updateLetters() {
-      const height = gameArea.clientHeight;
+    function handleLetterClick(id){
+      if(gameFinished || paused) return;
 
-      for (let i = letters.length - 1; i >= 0; i--) {
-        const letter = letters[i];
-        letter.y += letter.speed;
+      const letter = letters.find(l => l.id === id);
+      if(!letter) return;
 
-        if (letter.element) {
-          letter.element.style.top = letter.y + "px";
+      skipSpaces();
+      const expected = currentSentence[currentPosition];
+
+      if(expected && normalizeChar(letter.char) === normalizeChar(expected)){
+        correctCount++;
+        updateScore();
+        removeLetter(id);
+        currentPosition++;
+        skipSpaces();
+        renderProgress();
+
+        if(currentPosition >= currentSentence.length){
+          finishSentence();
+        }else{
+          setMessage("Dobrze! Poprawna litera.", "ok");
         }
+      }else{
+        wrongCount++;
+        updateScore();
+        removeLetter(id);
+        setMessage("Błąd! Ta litera nie pasuje do aktualnego miejsca w zdaniu.", "err");
+      }
+    }
 
-        if (letter.y > height) {
-          removeLetter(letter.id);
+    function updateLetters(){
+      if(!paused){
+        const height = gameArea.clientHeight;
+
+        for(let i = letters.length - 1; i >= 0; i--){
+          const letter = letters[i];
+          letter.y += letter.speed;
+
+          if(letter.element){
+            letter.element.style.top = letter.y + "px";
+          }
+
+          if(letter.y > height){
+            removeLetter(letter.id);
+          }
         }
       }
 
       animationId = requestAnimationFrame(updateLetters);
     }
 
-    function clearLetters() {
+    function clearLetters(){
       letters.forEach(letter => {
-        if (letter.element && letter.element.parentNode) {
+        if(letter.element && letter.element.parentNode){
           letter.element.parentNode.removeChild(letter.element);
         }
       });
       letters = [];
     }
 
-    function finishGame() {
-      gameFinished = true;
-      setMessage("Brawo! Udało się ułożyć całe zdanie.", "success");
-      renderProgress();
-      stopGameLoop();
-    }
-
-    function stopGameLoop() {
-      if (animationId) {
+    function stopLoops(){
+      if(animationId){
         cancelAnimationFrame(animationId);
         animationId = null;
       }
-      if (spawnInterval) {
+      if(spawnInterval){
         clearInterval(spawnInterval);
         spawnInterval = null;
       }
     }
 
-    function startGameLoop() {
-      stopGameLoop();
+    function startLoops(){
+      stopLoops();
       animationId = requestAnimationFrame(updateLetters);
       spawnInterval = setInterval(spawnLetter, 900);
     }
 
-    function loadSentence(index) {
-      stopGameLoop();
+    function finishSentence(){
+      gameFinished = true;
+      finishedCount++;
+      updateScore();
+      setMessage("Brawo! Udało się ułożyć całe zdanie.", "ok");
+      stopLoops();
+    }
+
+    function loadSentence(index){
+      stopLoops();
       clearLetters();
 
       currentSentenceIndex = index;
-      currentSentence = sentences[currentSentenceIndex];
+      currentSentence = sentences[currentSentenceIndex] || fallbackSentences[0];
       currentPosition = 0;
       gameFinished = false;
+      paused = false;
+      toggleBtn.textContent = "Pauza";
 
       skipSpaces();
-      renderHiddenSentence();
       renderProgress();
       setMessage("Kliknij poprawną literę.", "info");
-      startGameLoop();
+      startLoops();
     }
-
-    nextSentenceBtn.addEventListener("click", () => {
-      const nextIndex = (currentSentenceIndex + 1) % sentences.length;
-      loadSentence(nextIndex);
-    });
 
     restartBtn.addEventListener("click", () => {
       loadSentence(currentSentenceIndex);
     });
 
+    nextBtn.addEventListener("click", () => {
+      const nextIndex = (currentSentenceIndex + 1) % sentences.length;
+      loadSentence(nextIndex);
+    });
+
+    toggleBtn.addEventListener("click", () => {
+      paused = !paused;
+      toggleBtn.textContent = paused ? "Wznów" : "Pauza";
+      setMessage(paused ? "Gra zatrzymana." : "Gra wznowiona.", "info");
+    });
+
     window.addEventListener("resize", () => {
       letters.forEach(letter => {
         const maxX = Math.max(0, gameArea.clientWidth - 56);
-        if (letter.x > maxX) {
+        if(letter.x > maxX){
           letter.x = maxX;
-          if (letter.element) {
+          if(letter.element){
             letter.element.style.left = letter.x + "px";
           }
         }
       });
     });
 
-    loadSentence(0);
+    async function init(){
+      setMessage("Ładowanie zdań z sentences.json...", "info");
+      sentences = await loadSentencesFromJson();
+      updateScore();
+      loadSentence(0);
+
+      if(sentences === fallbackSentences){
+        setMessage("Nie udało się wczytać sentences.json. Załadowano przykładowe zdania.", "err");
+      }else{
+        setMessage("Wczytano zdania z pliku sentences.json.", "ok");
+      }
+    }
+
+    init();
   </script>
+</body>
 </html>
+
+<!-- =========================
+FILE: sentences.json
+========================= -->
+{
+  "sentences": [
+    "I like learning English",
+    "She goes to school every day",
+    "We are reading a good book",
+    "They play football after class",
+    "My friend is very helpful",
+    "This lesson is easy and fun"
+  ]
+}
