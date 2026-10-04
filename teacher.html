@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel nauczyciela - generator linku</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:#111827;
+      --panel2:#1f2937;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --accent:#38bdf8;
+      --success:#22c55e;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --border:rgba(148,163,184,.18);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,#0f172a 0%,#111827 100%);
+      min-height:100vh;
+    }
+
+    .container{
+      max-width:1150px;
+      margin:0 auto;
+      padding:20px;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .title{
+      font-size:30px;
+      font-weight:bold;
+    }
+
+    .topbar a{
+      text-decoration:none;
+      color:white;
+      background:var(--accent);
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:bold;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
+    }
+
+    @media (min-width:980px){
+      .grid{
+        grid-template-columns:1.1fr .9fr;
+      }
+    }
+
+    .card{
+      background:rgba(17,24,39,.92);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+      box-shadow:0 8px 20px rgba(0,0,0,.24);
+    }
+
+    h1,h2,h3{
+      margin-top:0;
+    }
+
+    label{
+      display:block;
+      margin-bottom:8px;
+      font-weight:bold;
+    }
+
+    textarea, input{
+      width:100%;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0b1220;
+      color:var(--text);
+      padding:12px;
+      font-size:15px;
+    }
+
+    textarea{
+      min-height:220px;
+      resize:vertical;
+      line-height:1.5;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    button{
+      border:none;
+      border-radius:10px;
+      padding:10px 14px;
+      font-size:14px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .primary{background:var(--accent); color:#08111f;}
+    .success{background:var(--success); color:#04130a;}
+    .danger{background:var(--danger); color:white;}
+    .secondary{background:#334155; color:white;}
+    .warning{background:var(--warning); color:#111827;}
+
+    .message{
+      margin-top:14px;
+      min-height:24px;
+      font-weight:bold;
+    }
+
+    .ok{color:var(--success)}
+    .err{color:var(--danger)}
+    .info{color:var(--accent)}
+
+    .small{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .sentence-item{
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:10px;
+      padding:10px 12px;
+      margin-bottom:10px;
+    }
+
+    .preview-list{
+      margin-top:12px;
+    }
+
+    .link-box{
+      margin-top:14px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    code{
+      background:#0b1220;
+      padding:2px 6px;
+      border-radius:6px;
+    }
+
+    .warning-box{
+      margin-top:14px;
+      padding:12px;
+      border-radius:12px;
+      background:rgba(245,158,11,.10);
+      border:1px solid rgba(245,158,11,.25);
+      color:#fde68a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <div class="title">Panel nauczyciela</div>
+        <div class="small">Wpisz zdania i wygeneruj link dla studentów działający na innych urządzeniach.</div>
+      </div>
+      <a href="index.html">Otwórz grę</a>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Zdania po angielsku</h2>
+        <label for="sentencesInput">Jedno zdanie w jednej linii</label>
+        <textarea id="sentencesInput" placeholder="Np.
+I like learning English
+She goes to school every day
+We are reading a good book"></textarea>
+
+        <div class="small" style="margin-top:10px;">
+          Ten generator tworzy link zawierający zdania w adresie strony.  
+          Dzięki temu student może otworzyć link na innym komputerze lub telefonie.
+        </div>
+
+        <div class="actions">
+          <button class="primary" id="generateBtn">Generuj link</button>
+          <button class="success" id="copyBtn">Kopiuj link</button>
+          <button class="secondary" id="openBtn">Otwórz link</button>
+          <button class="warning" id="demoBtn">Wstaw przykładowe</button>
+          <button class="danger" id="clearBtn">Wyczyść</button>
+        </div>
+
+        <div class="link-box">
+          <label for="generatedLink">Wygenerowany link dla studenta</label>
+          <input id="generatedLink" type="text" readonly placeholder="Tutaj pojawi się link..." />
+        </div>
+
+        <div class="message info" id="message">Wpisz zdania i kliknij „Generuj link”.</div>
+
+        <div class="warning-box">
+          Jeśli zdań będzie bardzo dużo albo będą bardzo długie, link może stać się zbyt długi.  
+          Dla typowych ćwiczeń szkolnych działa to bardzo dobrze.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Podgląd zdań</h2>
+        <div class="small" id="stats">Liczba zdań: 0</div>
+        <div id="previewList" class="preview-list"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h2>Jak to działa</h2>
+      <ol class="small">
+        <li>Wpisujesz zdania w panelu nauczyciela.</li>
+        <li>Klikasz <strong>Generuj link</strong>.</li>
+        <li>Wysyłasz link studentom.</li>
+        <li>Student otwiera link i gra dokładnie z tymi zdaniami.</li>
+      </ol>
+      <div class="small">
+        Na GitHub Pages wystarczą 2 pliki: <code>teacher.html</code> i <code>index.html</code>.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sentencesInput = document.getElementById("sentencesInput");
+    const generateBtn = document.getElementById("generateBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const openBtn = document.getElementById("openBtn");
+    const demoBtn = document.getElementById("demoBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const generatedLink = document.getElementById("generatedLink");
+    const message = document.getElementById("message");
+    const previewList = document.getElementById("previewList");
+    const stats = document.getElementById("stats");
+
+    const demoSentences = [
+      "I like learning English",
+      "She goes to school every day",
+      "We are reading a good book",
+      "They play football after class",
+      "My friend is very helpful"
+    ];
+
+    function setMessage(text, type = "info"){
+      message.textContent = text;
+      message.className = "message " + type;
+    }
+
+    function cleanSentences(lines){
+      return lines
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+    }
+
+    function escapeHtml(text){
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderPreview(sentences){
+      previewList.innerHTML = "";
+      stats.textContent = "Liczba zdań: " + sentences.length;
+
+      if(sentences.length === 0){
+        previewList.innerHTML = '<div class="small">Brak zdań do podglądu.</div>';
+        return;
+      }
+
+      sentences.forEach((sentence, index) => {
+        const item = document.createElement("div");
+        item.className = "sentence-item";
+        item.innerHTML = `<strong>${index + 1}.</strong> ${escapeHtml(sentence)}`;
+        previewList.appendChild(item);
+      });
+    }
+
+    function encodeSentences(sentences){
+      const json = JSON.stringify(sentences);
+      return encodeURIComponent(json);
+    }
+
+    function buildStudentLink(sentences){
+      const encoded = encodeSentences(sentences);
+      const baseUrl = new URL("index.html", window.location.href);
+      baseUrl.searchParams.set("sentences", encoded);
+      return baseUrl.toString();
+    }
+
+    function generateLink(){
+      const lines = sentencesInput.value.split("\n");
+      const sentences = cleanSentences(lines);
+
+      renderPreview(sentences);
+
+      if(sentences.length === 0){
+        generatedLink.value = "";
+        setMessage("Wpisz przynajmniej jedno zdanie.", "err");
+        return;
+      }
+
+      const link = buildStudentLink(sentences);
+      generatedLink.value = link;
+      setMessage("Link został wygenerowany.", "ok");
+    }
+
+    async function copyLink(){
+      const link = generatedLink.value.trim();
+      if(!link){
+        setMessage("Najpierw wygeneruj link.", "err");
+        return;
+      }
+
+      try{
+        await navigator.clipboard.writeText(link);
+        setMessage("Link skopiowany do schowka.", "ok");
+      }catch{
+        generatedLink.select();
+        document.execCommand("copy");
+        setMessage("Link skopiowany do schowka.", "ok");
+      }
+    }
+
+    function openLink(){
+      const link = generatedLink.value.trim();
+      if(!link){
+        setMessage("Najpierw wygeneruj link.", "err");
+        return;
+      }
+      window.open(link, "_blank");
+    }
+
+    generateBtn.addEventListener("click", generateLink);
+    copyBtn.addEventListener("click", copyLink);
+    openBtn.addEventListener("click", openLink);
+
+    demoBtn.addEventListener("click", () => {
+      sentencesInput.value = demoSentences.join("\n");
+      renderPreview(demoSentences);
+      generatedLink.value = "";
+      setMessage("Wstawiono przykładowe zdania.", "info");
+    });
+
+    clearBtn.addEventListener("click", () => {
+      sentencesInput.value = "";
+      generatedLink.value = "";
+      renderPreview([]);
+      setMessage("Wyczyszczono pola.", "info");
+    });
+
+    (function init(){
+      sentencesInput.value = demoSentences.join("\n");
+      renderPreview(demoSentences);
+    })();
+  </script>
+</body>
+</html>
