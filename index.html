@@ -1,391 +1,3 @@
-<!-- =========================
-FILE: teacher.html
-========================= -->
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel nauczyciela</title>
-  <style>
-    :root{
-      --bg:#0f172a;
-      --panel:#111827;
-      --panel2:#1f2937;
-      --text:#e5e7eb;
-      --muted:#94a3b8;
-      --accent:#38bdf8;
-      --success:#22c55e;
-      --danger:#ef4444;
-      --warning:#f59e0b;
-      --border:rgba(148,163,184,.18);
-    }
-
-    *{box-sizing:border-box}
-
-    body{
-      margin:0;
-      font-family:Arial,sans-serif;
-      background:linear-gradient(180deg,#0f172a 0%,#111827 100%);
-      color:var(--text);
-      min-height:100vh;
-    }
-
-    .container{
-      max-width:1150px;
-      margin:0 auto;
-      padding:20px;
-    }
-
-    .topbar{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:18px;
-    }
-
-    .title{
-      font-size:30px;
-      font-weight:bold;
-    }
-
-    .topbar a{
-      text-decoration:none;
-      color:white;
-      background:var(--accent);
-      padding:10px 14px;
-      border-radius:10px;
-      font-weight:bold;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:16px;
-    }
-
-    @media (min-width:980px){
-      .grid{
-        grid-template-columns:1.1fr .9fr;
-      }
-    }
-
-    .card{
-      background:rgba(17,24,39,.92);
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:16px;
-      box-shadow:0 8px 20px rgba(0,0,0,.24);
-    }
-
-    h1,h2,h3{
-      margin-top:0;
-    }
-
-    label{
-      display:block;
-      margin-bottom:8px;
-      font-weight:bold;
-    }
-
-    textarea, input{
-      width:100%;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background:#0b1220;
-      color:var(--text);
-      padding:12px;
-      font-size:15px;
-    }
-
-    textarea{
-      min-height:260px;
-      resize:vertical;
-      line-height:1.5;
-    }
-
-    .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
-    }
-
-    button{
-      border:none;
-      border-radius:10px;
-      padding:10px 14px;
-      font-size:14px;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    .primary{background:var(--accent); color:#08111f;}
-    .success{background:var(--success); color:#04130a;}
-    .danger{background:var(--danger); color:white;}
-    .secondary{background:#334155; color:white;}
-    .warning{background:var(--warning); color:#111827;}
-
-    .message{
-      margin-top:14px;
-      min-height:24px;
-      font-weight:bold;
-    }
-
-    .ok{color:var(--success)}
-    .err{color:var(--danger)}
-    .info{color:var(--accent)}
-
-    .small{
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.6;
-    }
-
-    .sentence-item{
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:10px;
-      padding:10px 12px;
-      margin-bottom:10px;
-    }
-
-    .preview-list{
-      margin-top:12px;
-    }
-
-    .download-box{
-      margin-top:14px;
-    }
-
-    code{
-      background:#0b1220;
-      padding:2px 6px;
-      border-radius:6px;
-    }
-
-    .note{
-      margin-top:12px;
-      padding:12px;
-      border-radius:12px;
-      background:rgba(56,189,248,.08);
-      border:1px solid rgba(56,189,248,.2);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="topbar">
-      <div>
-        <div class="title">Panel nauczyciela</div>
-        <div class="small">Tworzenie pliku <code>sentences.json</code> do profesjonalnej wersji gry.</div>
-      </div>
-      <a href="index.html">Otwórz grę studenta</a>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h2>Zdania po angielsku</h2>
-        <label for="sentencesInput">Jedno zdanie w jednej linii</label>
-        <textarea id="sentencesInput" placeholder="Np.
-I like learning English
-She goes to school every day
-We are reading a good book"></textarea>
-
-        <div class="small" style="margin-top:10px;">
-          Ta wersja eksportuje gotowy plik <code>sentences.json</code>.  
-          Potem wrzucasz ten plik razem z <code>index.html</code> na GitHub Pages.
-        </div>
-
-        <div class="actions">
-          <button class="primary" id="previewBtn">Podgląd</button>
-          <button class="success" id="downloadBtn">Pobierz sentences.json</button>
-          <button class="secondary" id="copyBtn">Kopiuj JSON</button>
-          <button class="warning" id="demoBtn">Wstaw przykładowe</button>
-          <button class="danger" id="clearBtn">Wyczyść</button>
-        </div>
-
-        <div class="download-box">
-          <label for="jsonOutput">Podgląd pliku JSON</label>
-          <textarea id="jsonOutput" readonly></textarea>
-        </div>
-
-        <div class="message info" id="message">Wpisz zdania i wygeneruj plik JSON.</div>
-
-        <div class="note small">
-          <strong>Jak publikować:</strong><br>
-          1. Edytujesz zdania tutaj<br>
-          2. Pobierasz <code>sentences.json</code><br>
-          3. Wrzucasz plik do repozytorium GitHub obok <code>index.html</code><br>
-          4. Studenci otwierają zwykły link do gry
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Podgląd zdań</h2>
-        <div class="small" id="stats">Liczba zdań: 0</div>
-        <div id="previewList" class="preview-list"></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:16px;">
-      <h2>Struktura projektu</h2>
-      <div class="small">
-        W repozytorium powinny być 3 pliki:
-        <ul>
-          <li><code>index.html</code> — gra dla studentów</li>
-          <li><code>teacher.html</code> — panel nauczyciela</li>
-          <li><code>sentences.json</code> — baza zdań</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const sentencesInput = document.getElementById("sentencesInput");
-    const previewBtn = document.getElementById("previewBtn");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const copyBtn = document.getElementById("copyBtn");
-    const demoBtn = document.getElementById("demoBtn");
-    const clearBtn = document.getElementById("clearBtn");
-    const jsonOutput = document.getElementById("jsonOutput");
-    const message = document.getElementById("message");
-    const previewList = document.getElementById("previewList");
-    const stats = document.getElementById("stats");
-
-    const demoSentences = [
-      "I like learning English",
-      "She goes to school every day",
-      "We are reading a good book",
-      "They play football after class",
-      "My friend is very helpful",
-      "This lesson is easy and fun"
-    ];
-
-    function setMessage(text, type = "info"){
-      message.textContent = text;
-      message.className = "message " + type;
-    }
-
-    function cleanSentences(lines){
-      return lines
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
-    }
-
-    function buildJson(sentences){
-      return JSON.stringify({ sentences }, null, 2);
-    }
-
-    function escapeHtml(text){
-      const div = document.createElement("div");
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function renderPreview(sentences){
-      previewList.innerHTML = "";
-      stats.textContent = "Liczba zdań: " + sentences.length;
-
-      if(sentences.length === 0){
-        previewList.innerHTML = '<div class="small">Brak zdań do podglądu.</div>';
-        return;
-      }
-
-      sentences.forEach((sentence, index) => {
-        const item = document.createElement("div");
-        item.className = "sentence-item";
-        item.innerHTML = `<strong>${index + 1}.</strong> ${escapeHtml(sentence)}`;
-        previewList.appendChild(item);
-      });
-    }
-
-    function generateData(){
-      const lines = sentencesInput.value.split("\n");
-      const sentences = cleanSentences(lines);
-
-      renderPreview(sentences);
-
-      if(sentences.length === 0){
-        jsonOutput.value = "";
-        setMessage("Wpisz przynajmniej jedno zdanie.", "err");
-        return null;
-      }
-
-      const json = buildJson(sentences);
-      jsonOutput.value = json;
-      setMessage("JSON został przygotowany.", "ok");
-      return { sentences, json };
-    }
-
-    function downloadJsonFile(filename, content){
-      const blob = new Blob([content], { type: "application/json;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    async function copyJson(){
-      const value = jsonOutput.value.trim();
-      if(!value){
-        setMessage("Najpierw przygotuj JSON.", "err");
-        return;
-      }
-
-      try{
-        await navigator.clipboard.writeText(value);
-        setMessage("JSON skopiowany do schowka.", "ok");
-      }catch{
-        jsonOutput.select();
-        document.execCommand("copy");
-        setMessage("JSON skopiowany do schowka.", "ok");
-      }
-    }
-
-    previewBtn.addEventListener("click", generateData);
-
-    downloadBtn.addEventListener("click", () => {
-      const data = generateData();
-      if(!data) return;
-      downloadJsonFile("sentences.json", data.json);
-      setMessage("Plik sentences.json został pobrany.", "ok");
-    });
-
-    copyBtn.addEventListener("click", copyJson);
-
-    demoBtn.addEventListener("click", () => {
-      sentencesInput.value = demoSentences.join("\n");
-      renderPreview(demoSentences);
-      jsonOutput.value = buildJson(demoSentences);
-      setMessage("Wstawiono przykładowe zdania.", "info");
-    });
-
-    clearBtn.addEventListener("click", () => {
-      sentencesInput.value = "";
-      jsonOutput.value = "";
-      renderPreview([]);
-      setMessage("Wyczyszczono pola.", "info");
-    });
-
-    (function init(){
-      sentencesInput.value = demoSentences.join("\n");
-      renderPreview(demoSentences);
-      jsonOutput.value = buildJson(demoSentences);
-    })();
-  </script>
-</body>
-</html>
-
-<!-- =========================
-FILE: index.html
-========================= -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -581,7 +193,7 @@ FILE: index.html
 
     .score{
       display:grid;
-      grid-template-columns:repeat(4,1fr);
+      grid-template-columns:repeat(3,1fr);
       gap:10px;
       margin-top:10px;
     }
@@ -621,7 +233,7 @@ FILE: index.html
         <h2>Instrukcja</h2>
         <div class="small">
           Klikaj litery, które pasują do zdania.  
-          Litery trzeba wybierać po kolei.  
+          Musisz układać zdanie po kolei.  
           Jeśli klikniesz złą literę, pojawi się komunikat.
         </div>
       </div>
@@ -637,7 +249,7 @@ FILE: index.html
 
       <div class="card">
         <h2>Status</h2>
-        <div class="message info" id="message">Ładowanie zdań...</div>
+        <div class="message info" id="message">Kliknij poprawną literę.</div>
         <div class="small" id="statusLine">Postęp: 0%</div>
       </div>
     </div>
@@ -666,10 +278,6 @@ FILE: index.html
             Ukończone
             <strong id="finishedCount">0</strong>
           </div>
-          <div class="score-box">
-            Razem zdań
-            <strong id="totalCount">0</strong>
-          </div>
         </div>
       </div>
     </div>
@@ -695,7 +303,6 @@ FILE: index.html
     const correctCountEl = document.getElementById("correctCount");
     const wrongCountEl = document.getElementById("wrongCount");
     const finishedCountEl = document.getElementById("finishedCount");
-    const totalCountEl = document.getElementById("totalCount");
 
     let sentences = [];
     let currentSentenceIndex = 0;
@@ -712,33 +319,30 @@ FILE: index.html
     let wrongCount = 0;
     let finishedCount = 0;
 
-    async function loadSentencesFromJson(){
+    function getSentencesFromUrl(){
+      const url = new URL(window.location.href);
+      const encoded = url.searchParams.get("sentences");
+
+      if(!encoded) return null;
+
       try{
-        const response = await fetch("sentences.json", { cache: "no-store" });
+        const json = decodeURIComponent(encoded);
+        const parsed = JSON.parse(json);
 
-        if(!response.ok){
-          throw new Error("Nie udało się pobrać sentences.json");
+        if(Array.isArray(parsed)){
+          const cleaned = parsed
+            .map(item => String(item).trim())
+            .filter(item => item.length > 0);
+
+          if(cleaned.length > 0){
+            return cleaned;
+          }
         }
-
-        const data = await response.json();
-
-        if(!data || !Array.isArray(data.sentences)){
-          throw new Error("Niepoprawny format sentences.json");
-        }
-
-        const cleaned = data.sentences
-          .map(item => String(item).trim())
-          .filter(item => item.length > 0);
-
-        if(cleaned.length === 0){
-          throw new Error("Plik sentences.json nie zawiera zdań");
-        }
-
-        return cleaned;
-      }catch(error){
-        console.error(error);
-        return fallbackSentences;
+      }catch(e){
+        console.error("Błąd odczytu zdań z linku:", e);
       }
+
+      return null;
     }
 
     function setMessage(text, type = "info"){
@@ -760,7 +364,6 @@ FILE: index.html
       correctCountEl.textContent = correctCount;
       wrongCountEl.textContent = wrongCount;
       finishedCountEl.textContent = finishedCount;
-      totalCountEl.textContent = sentences.length;
     }
 
     function skipSpaces(){
@@ -789,7 +392,6 @@ FILE: index.html
       const allLetters = currentSentence.replace(/\s/g, "").length;
       const doneLetters = currentSentence.slice(0, currentPosition).replace(/\s/g, "").length;
       const percent = allLetters === 0 ? 100 : Math.round((doneLetters / allLetters) * 100);
-
       statusLine.textContent = "Postęp: " + percent + "%";
       sentenceNumber.textContent = "Zdanie " + (currentSentenceIndex + 1) + " z " + sentences.length;
     }
@@ -815,7 +417,7 @@ FILE: index.html
       const expected = currentSentence[currentPosition];
       const useCorrect = Math.random() < 0.45 && expected && expected !== " ";
 
-      const char = useCorrect
+      let char = useCorrect
         ? normalizeChar(expected)
         : charsPool[Math.floor(Math.random() * charsPool.length)];
 
@@ -975,34 +577,18 @@ FILE: index.html
       });
     });
 
-    async function init(){
-      setMessage("Ładowanie zdań z sentences.json...", "info");
-      sentences = await loadSentencesFromJson();
+    (function init(){
+      const fromUrl = getSentencesFromUrl();
+      sentences = fromUrl && fromUrl.length > 0 ? fromUrl : fallbackSentences;
       updateScore();
       loadSentence(0);
 
-      if(sentences === fallbackSentences){
-        setMessage("Nie udało się wczytać sentences.json. Załadowano przykładowe zdania.", "err");
+      if(fromUrl && fromUrl.length > 0){
+        setMessage("Wczytano zdania z linku nauczyciela.", "info");
       }else{
-        setMessage("Wczytano zdania z pliku sentences.json.", "ok");
+        setMessage("Brak zdań w linku. Załadowano przykładowe zdania.", "info");
       }
-    }
-
-    init();
+    })();
   </script>
 </body>
 </html>
-
-<!-- =========================
-FILE: sentences.json
-========================= -->
-{
-  "sentences": [
-    "I like learning English",
-    "She goes to school every day",
-    "We are reading a good book",
-    "They play football after class",
-    "My friend is very helpful",
-    "This lesson is easy and fun"
-  ]
-}
