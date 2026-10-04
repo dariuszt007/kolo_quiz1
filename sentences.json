@@ -1,0 +1,20 @@
+{
+  "title": "English Sentences - Class 5A",
+  "settings": {
+    "difficulty": "medium",
+    "spawnRate": 900,
+    "timerSeconds": 45,
+    "maxMistakes": 5,
+    "randomOrder": false,
+    "allowHint": true,
+    "allowSolution": false
+  },
+  "sentences": [
+    "I like learning English",
+    "She goes to school every day",
+    "We are reading a good book",
+    "They play football after class",
+    "My friend is very helpful",
+    "This lesson is easy and fun"
+  ]
+}
